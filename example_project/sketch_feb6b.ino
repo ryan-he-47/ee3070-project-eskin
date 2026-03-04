@@ -3,7 +3,7 @@
 #include "ThingSpeak.h"
 char ssid[] = "REDMI K80 U"; // your network SSID (name) 
 char pass[] = "88888888"; // your network password 
-int status = WL_IDLE_STATUS; // the Wifi radio's status 
+int status = WL_IDLE_STATUS; // the Wifi radio's status.
 WiFiEspClient  client;
 
 
