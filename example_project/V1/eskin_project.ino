@@ -1,0 +1,106 @@
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/queue.h>
+
+#include <src/FPGA_Reader.h>
+#include <pressure_process.h>
+#include <lib/ESP32_Host_MIDI/src/ESP32_Host_MIDI.h>
+#include "BLEMidi.h"
+
+#define MATRIX_ROWS 16  // 矩阵行数
+#define MATRIX_COLS 16  // 矩阵列数
+typedef uint8_t eskinMatrix[MATRIX_ROWS][MATRIX_COLS]; 
+//声明压力矩阵队列句柄
+QueueHandle_t matrixQueue=xQueueCreate(5, sizeof(eskinMatrix));// 队列长度，单个矩阵的字节数（16*16=256字节）;  //定义矩阵队列句柄
+QueueHandle_t midiQueue=xQueueCreate(5, sizeof(MIDIEvent));
+//实例化FPGA接收器
+PressureMatrixReceiver receiver(Serial1, Serial, matrixQueue);  // 接收串口 Serial1，输出到matrixQueue, 当queue句柄没有指定时，使用serial打印 
+//实例化压力处理器
+PressToMIDI pressToMIDI(midiQueue);
+//声明任务函数1
+void taskReceiveFPGA(void *pvParameters);
+void taskProcessMatrix(void *pvParameters);
+void taskSendMIDI(void *pvParameters);
+void setup() {
+    Serial.begin(115200);
+    
+    receiver.begin(115200, 16, 17);  // RX=16, TX=17
+
+    if (matrixQueue == NULL) {//处理队列创建失败
+        Serial.println("Failed to create queue");
+        while(1);
+    }
+    xTaskCreatePinnedToCore(
+        taskReceiveFPGA,   // 任务函数
+        "Receive data stream from fpga",     // 任务名
+        2048,          // 堆栈大小
+        NULL,          // 参数
+        1,             // 优先级
+        NULL,          // 任务句柄
+        0              // 核心0
+    );
+
+    // 创建发送任务，运行在核心1
+    xTaskCreatePinnedToCore(
+        taskProcessMatrix,
+        "Process matrix, yield MIDIEvent",
+        1024*64,
+        NULL,
+        1,
+        NULL,
+        1
+    );
+    xTaskCreatePinnedToCore(
+        taskSendMIDI,
+        "Receive MIDI event from queue and send",
+        1024,
+        NULL,
+        2,
+        NULL,
+        0
+    );
+
+}
+
+
+
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  vTaskDelay(portMAX_DELAY);
+}
+void taskReceiveFPGA(void *pvParameters) {
+    while(1) {
+
+        receiver.process();  // 不断处理串口数据
+        // 使用vTaskDelay(1)让出CPU避免占用CPU
+        vTaskDelay(1); // 可选
+    }
+}
+
+// 发送任务
+
+void taskProcessMatrix(void *pvParameters) {
+    eskinMatrix matrixBuf;
+
+    while(1) {
+        // 阻塞等待队列中的矩阵数据
+        if (xQueueReceive(matrixQueue,matrixBuf, portMAX_DELAY) == pdPASS) {
+            
+            pressToMIDI.process(matrixBuf);
+            
+            
+            
+        }
+    }
+}
+void taskSendMIDI(void *pvParameters){
+    MIDIEvent eventBuf;
+    while(1){
+        if(xQueueReceive(midiQueue,&eventBuf,portMAX_DELAY)==pdPASS){
+            bleMidiSendEvent(eventBuf);
+            debugSend(nullptr,String(eventBuf.data1));
+            debugSend(nullptr,String(eventBuf.data2));
+        }
+    }
+}
