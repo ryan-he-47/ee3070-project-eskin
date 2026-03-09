@@ -1,0 +1,5 @@
+# 忽略未使用的库文件夹
+not_use_libraries/
+
+# 忽略AI相关的本地测试文件夹
+eskin_project_for_ai/
