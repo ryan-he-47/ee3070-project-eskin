@@ -4,10 +4,11 @@
 
 #include <src/FPGA_Reader.h>
 #include <pressure_process.h>
-#include <lib/ESP32_Host_MIDI/src/ESP32_Host_MIDI.h>
+#include "BLEMidi.h"
 
 #define MATRIX_ROWS 16  // 矩阵行数
 #define MATRIX_COLS 16  // 矩阵列数
+
 typedef uint8_t eskinMatrix[MATRIX_ROWS][MATRIX_COLS]; 
 //声明压力矩阵队列句柄
 QueueHandle_t matrixQueue=xQueueCreate(5, sizeof(eskinMatrix));// 队列长度，单个矩阵的字节数（16*16=256字节）;  //定义矩阵队列句柄
@@ -23,6 +24,11 @@ void taskSendMIDI(void *pvParameters);
 void setup() {
     Serial.begin(115200);
     
+    bleMidiBegin("ESP32-MIDI");
+    delay(1000); //等待串口稳定
+    Serial.println("===程序启动===");
+    Serial.printf("Free heap:%d\n",ESP.getFreeHeap());
+
     receiver.begin(115200, 16, 17);  // RX=16, TX=17
 
     if (matrixQueue == NULL) {//处理队列创建失败
@@ -52,7 +58,7 @@ void setup() {
     xTaskCreatePinnedToCore(
         taskSendMIDI,
         "Receive MIDI event from queue and send",
-        1024,
+        1024*8,
         NULL,
         2,
         NULL,
@@ -97,9 +103,12 @@ void taskSendMIDI(void *pvParameters){
     MIDIEvent eventBuf;
     while(1){
         if(xQueueReceive(midiQueue,&eventBuf,portMAX_DELAY)==pdPASS){
-            
-            debugSend(nullptr,String(eventBuf.data1));
-            debugSend(nullptr,String(eventBuf.data2));
+            Serial.print("note");
+            Serial.println(String(eventBuf.data1));
+            Serial.print("force");
+            Serial.println(String(eventBuf.data2));
+            bleMidiSendEvent(eventBuf);
+
         }
     }
 }

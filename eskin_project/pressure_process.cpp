@@ -60,7 +60,7 @@ void PressToMIDI::process(eskinMatrix& pressMat) {
   _updatePress(pressMat);
   
   // 业务逻辑写这里
-  debugSend(&_pressNow,"frame done");//向电脑发送调试信息，可选矩阵和字符串
+  //debugSend(&_pressNow,"frame done");//向电脑发送调试信息，可选矩阵和字符串
   _basicInstrument(_midiQueue);
   // 自动缓存当前帧
   addCurrentFrameToCache();
@@ -158,8 +158,8 @@ void PressToMIDI::_basicInstrument(QueueHandle_t output){
         
         threshold=_usingConfig.trigThreshMap[i][j]+10;
         event.channel=1;
-        event.data1=i+j;
-        event.data2=_pressNow[i][j];
+        event.data1=i+j+50;
+        event.data2=_pressNow[i][j]-80;
         if(_pressNow[i][j]>=threshold&&!flagMap[i][j]){
           event.type=MIDIEventType::NoteOn;
           flagMap[i][j]=1;
