@@ -3,8 +3,8 @@
 #include <freertos/queue.h>
 
 #include <src/FPGA_Reader.h>
-#include <pressure_process.h>
-#include "BLEMidi.h"
+#include <src/pressure_process.h>
+#include "src/BLEMidi.h"
 
 #define MATRIX_ROWS 16  // 矩阵行数
 #define MATRIX_COLS 16  // 矩阵列数
