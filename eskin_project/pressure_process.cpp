@@ -26,7 +26,7 @@ KeyConfig::KeyConfig(){
   for (int i = 0; i < MATRIX_ROWS; i++) {
             for (int j = 0; j < MATRIX_COLS; j++) {
                 keyTypeMap[i][j] = KeyType::BASIC_INSTRUMENT;
-                trigThreshMap[i][j]=94;
+                trigThreshMap[i][j]=37;
                 pitchMap[i][j]=0;
             }
         }
@@ -151,20 +151,20 @@ void PressToMIDI::_basicInstrument(QueueHandle_t output){
   uint8_t threshold;
   static bool flagMap[16][16]={false};
   
-
+  
   for (int i = 0; i < MATRIX_ROWS; i++) {
     for (int j = 0; j < MATRIX_COLS; j++) {
       if(_usingConfig.keyTypeMap[i][j]==KeyType::BASIC_INSTRUMENT){
         
-        threshold=_usingConfig.trigThreshMap[i][j]+10;
+        
         event.channel=1;
         event.data1=i+j+50;
-        event.data2=_pressNow[i][j]-80;
-        if(_pressNow[i][j]>=threshold&&!flagMap[i][j]){
+        event.data2=_pressNow[i][j];
+        if(_pressNow[i][j]>=_usingConfig.trigThreshMap[i][j]&&!flagMap[i][j]){
           event.type=MIDIEventType::NoteOn;
           flagMap[i][j]=1;
           xQueueSendToBack(output, &event, 0);
-        }else if(_pressNow[i][j]<threshold&&flagMap[i][j]){
+        }else if(_pressNow[i][j]<_usingConfig.trigThreshMap[i][j]&&flagMap[i][j]){
           event.type=MIDIEventType::NoteOff;
           flagMap[i][j]=0;
           xQueueSendToBack(output, &event, 0);

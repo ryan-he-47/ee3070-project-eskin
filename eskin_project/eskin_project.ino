@@ -3,7 +3,7 @@
 #include <freertos/queue.h>
 
 #include <src/FPGA_Reader.h>
-#include <src/pressure_process.h>
+#include <pressure_process.h>
 #include "src/BLEMidi.h"
 
 #define MATRIX_ROWS 16  // 矩阵行数
@@ -22,14 +22,14 @@ void taskReceiveFPGA(void *pvParameters);
 void taskProcessMatrix(void *pvParameters);
 void taskSendMIDI(void *pvParameters);
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(460800);
     
     bleMidiBegin("ESP32-MIDI");
     delay(1000); //等待串口稳定
     Serial.println("===程序启动===");
     Serial.printf("Free heap:%d\n",ESP.getFreeHeap());
 
-    receiver.begin(115200, 16, 17);  // RX=16, TX=17
+    receiver.begin(460800, 16, 17);  // RX=16, TX=17
 
     if (matrixQueue == NULL) {//处理队列创建失败
         Serial.println("Failed to create queue");
@@ -45,11 +45,11 @@ void setup() {
         0              // 核心0
     );
 
-    // 创建发送任务，运行在核心1
+    // midi处理任务，运行在核心1
     xTaskCreatePinnedToCore(
         taskProcessMatrix,
         "Process matrix, yield MIDIEvent",
-        1024*64,
+        2048,
         NULL,
         1,
         NULL,
@@ -87,27 +87,47 @@ void taskReceiveFPGA(void *pvParameters) {
 
 void taskProcessMatrix(void *pvParameters) {
     eskinMatrix matrixBuf;
-
+    int maxDelay=0;
     while(1) {
         // 阻塞等待队列中的矩阵数据
         if (xQueueReceive(matrixQueue,matrixBuf, portMAX_DELAY) == pdPASS) {
-            
+            int start=micros();//调试计时
             pressToMIDI.process(matrixBuf);
-            
-            
+            int end=micros();//调试计时
+            //===========调试实现============/
+                Serial.print("latency : ");   //
+                int delay=end-start;          //
+                Serial.println(delay);        //
+                if(delay>maxDelay){           //
+                    maxDelay=delay;           //
+                }                             //
+                Serial.print(", max latency:");//
+                Serial.println(maxDelay);      //
+            //================================
             
         }
     }
 }
 void taskSendMIDI(void *pvParameters){
     MIDIEvent eventBuf;
+    String on = "Note  On";
+    String off ="Note Off";
+    String result;
     while(1){
         if(xQueueReceive(midiQueue,&eventBuf,portMAX_DELAY)==pdPASS){
-            Serial.print("note");
-            Serial.println(String(eventBuf.data1));
-            Serial.print("force");
+            
+            if(eventBuf.type==MIDIEventType::NoteOn){
+                result=on;
+            }else{result=off;}
+            /*
+            Serial.print("event:");
+            Serial.print(result);
+            Serial.print(", note  :");
+            Serial.print(String(eventBuf.data1));
+            Serial.print(", force :");
             Serial.println(String(eventBuf.data2));
             bleMidiSendEvent(eventBuf);
+            */
 
         }
     }

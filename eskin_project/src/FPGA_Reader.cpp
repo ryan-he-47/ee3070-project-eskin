@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "FPGA_Reader.h"
 #include <string.h>
-
+int errorCount=0;
 // 默认传感器映射表（与大哥的原始代码一致）
 const uint8_t PressureMatrixReceiver::DEFAULT_MAP[16] = {
     2, 6, 10, 14, 12, 8, 4, 0, 7, 5, 3, 1, 9, 11, 13, 15
@@ -41,7 +41,9 @@ void PressureMatrixReceiver::process() {
         } else { // WAIT_VALUE
             do{
             uint8_t value = byte;
-            if(byte<80){//判断是否为有效值，若无效则说明发生了键值错位，丢弃该值，直接读取下一个值
+            if(byte<25){//判断是否为有效值，若无效则说明发生了键值错位，丢弃该值，直接读取下一个值
+                errorCount++;
+                Serial.println("Error: Invalid pressure value received. Total errors: " + String(errorCount));
                 break;
             }
             // 按原始逻辑存储矩阵
