@@ -6,6 +6,8 @@
 #include <pressure_process.h>
 #include "src/BLEMidi.h"
 
+#include <src/Keyboard.h>
+
 #define MATRIX_ROWS 16  // 矩阵行数
 #define MATRIX_COLS 16  // 矩阵列数
 
@@ -21,6 +23,8 @@ PressToMIDI pressToMIDI(midiQueue);
 void taskReceiveFPGA(void *pvParameters);
 void taskProcessMatrix(void *pvParameters);
 void taskSendMIDI(void *pvParameters);
+void taskCheckKeyboard(void *pvParameters);
+
 void setup() {
     Serial.begin(460800);
     
@@ -30,6 +34,12 @@ void setup() {
     Serial.printf("Free heap:%d\n",ESP.getFreeHeap());
 
     receiver.begin(460800, 16, 17);  // RX=16, TX=17
+
+
+    if (!keyboard.begin()) {// 键盘初始化
+        Serial.println(F("Keyboard init failed"));
+        while (1);  
+    }
 
     if (matrixQueue == NULL) {//处理队列创建失败
         Serial.println("Failed to create queue");
@@ -51,10 +61,11 @@ void setup() {
         "Process matrix, yield MIDIEvent",
         2048,
         NULL,
-        1,
+        2,
         NULL,
         1
     );
+
     xTaskCreatePinnedToCore(
         taskSendMIDI,
         "Receive MIDI event from queue and send",
@@ -64,7 +75,16 @@ void setup() {
         NULL,
         0
     );
-
+    
+    xTaskCreatePinnedToCore(
+        taskCheckKeyboard,
+        "Continuously check keyboard",
+        1024*8,
+        NULL,
+        1,
+        NULL,
+        1
+    );
 }
 
 
@@ -130,5 +150,12 @@ void taskSendMIDI(void *pvParameters){
             */
 
         }
+    }
+}
+
+void taskCheckKeyboard(void *pvParameters){
+    while(1){
+        keyboard.tickAndProcess();
+        vTaskDelay(1);
     }
 }
