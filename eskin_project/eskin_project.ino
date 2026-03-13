@@ -3,7 +3,7 @@
 #include <freertos/queue.h>
 
 #include <src/FPGA_Reader.h>
-#include <pressure_process.h>
+#include <src/pressure_process.h>
 #include "src/BLEMidi.h"
 
 #include <src/Keyboard.h>
@@ -95,11 +95,25 @@ void loop() {
   vTaskDelay(portMAX_DELAY);
 }
 void taskReceiveFPGA(void *pvParameters) {
+    int maxDelay=0;
     while(1) {
-
+        int start=micros();//调试计时
         receiver.process();  // 不断处理串口数据
-        // 使用vTaskDelay(1)让出CPU避免占用CPU
-        vTaskDelay(1); // 可选
+        
+        int end=micros();//调试计时
+            //===========调试实现============/
+                Serial.print("latency : ");   //
+                int delay=end-start;          //
+                Serial.println(delay);        //
+                if(delay>maxDelay){           //
+                    maxDelay=delay;
+                    Serial.print(", max latency:");//
+                    Serial.println(maxDelay);            //
+                }                             //
+                Serial.print(", max latency:");//
+                Serial.println(maxDelay);      //
+            //================================//
+        vTaskDelay(1); // 使用vTaskDelay(1)让出CPU避免占用CPU
     }
 }
 
@@ -107,14 +121,14 @@ void taskReceiveFPGA(void *pvParameters) {
 
 void taskProcessMatrix(void *pvParameters) {
     eskinMatrix matrixBuf;
-    int maxDelay=0;
+    //int maxDelay=0;
     while(1) {
         // 阻塞等待队列中的矩阵数据
         if (xQueueReceive(matrixQueue,matrixBuf, portMAX_DELAY) == pdPASS) {
-            int start=micros();//调试计时
+            //int start=micros();//调试计时           
             pressToMIDI.process(matrixBuf);
-            int end=micros();//调试计时
-            //===========调试实现============/
+            //int end=micros();//调试计时
+            /*/===========调试实现============/
                 Serial.print("latency : ");   //
                 int delay=end-start;          //
                 Serial.println(delay);        //
@@ -123,7 +137,7 @@ void taskProcessMatrix(void *pvParameters) {
                 }                             //
                 Serial.print(", max latency:");//
                 Serial.println(maxDelay);      //
-            //================================
+            //================================/*/
             
         }
     }
@@ -139,15 +153,15 @@ void taskSendMIDI(void *pvParameters){
             if(eventBuf.type==MIDIEventType::NoteOn){
                 result=on;
             }else{result=off;}
-            /*
+            //
             Serial.print("event:");
             Serial.print(result);
             Serial.print(", note  :");
             Serial.print(String(eventBuf.data1));
             Serial.print(", force :");
-            Serial.println(String(eventBuf.data2));
+            Serial.println(String(eventBuf.data2));//
             bleMidiSendEvent(eventBuf);
-            */
+            
 
         }
     }
@@ -155,7 +169,7 @@ void taskSendMIDI(void *pvParameters){
 
 void taskCheckKeyboard(void *pvParameters){
     while(1){
-        keyboard.tickAndProcess();
-        vTaskDelay(1);
+        //keyboard.tickAndProcess();
+        vTaskDelay(125);
     }
 }

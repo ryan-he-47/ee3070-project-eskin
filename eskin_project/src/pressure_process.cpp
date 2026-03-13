@@ -148,23 +148,22 @@ uint8_t (*PressToMIDI::getCacheBiasPtr(int offset))[MATRIX_COLS][2] {
 
 void PressToMIDI::_basicInstrument(QueueHandle_t output){
   MIDIEvent event;
-  uint8_t threshold;
+  
   static bool flagMap[16][16]={false};
   
   
   for (int i = 0; i < MATRIX_ROWS; i++) {
     for (int j = 0; j < MATRIX_COLS; j++) {
+      
       if(_usingConfig.keyTypeMap[i][j]==KeyType::BASIC_INSTRUMENT){
-        
-        
         event.channel=1;
         event.data1=i+j+50;
         event.data2=_pressNow[i][j];
-        if(_pressNow[i][j]>=_usingConfig.trigThreshMap[i][j]+5&&!flagMap[i][j]){
+        if((_pressNow[i][j]>=(_usingConfig.trigThreshMap[i][j]+10))&&!flagMap[i][j]){
           event.type=MIDIEventType::NoteOn;
           flagMap[i][j]=1;
           xQueueSendToBack(output, &event, 0);
-        }else if(_pressNow[i][j]<_usingConfig.trigThreshMap[i][j]&&flagMap[i][j]){
+        }else if((_pressNow[i][j]<(_usingConfig.trigThreshMap[i][j]))&&flagMap[i][j]){
           event.type=MIDIEventType::NoteOff;
           flagMap[i][j]=0;
           xQueueSendToBack(output, &event, 0);

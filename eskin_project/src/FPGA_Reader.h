@@ -37,9 +37,9 @@ private:
     QueueHandle_t _matrixQueue;
     uint8_t _pressure_grid[16][16];
     uint8_t _sensor_map[16];
-
-    enum SyncState { WAIT_HEADER, WAIT_VALUE } _state;
-    uint8_t _current_orig_row, _current_col, _current_row;
+    uint8_t bufferArray[32];
+    bool _state;
+    uint8_t  _current_col, _current_row;
     int _frame_counter;
 
     static const uint8_t DEFAULT_MAP[16];
