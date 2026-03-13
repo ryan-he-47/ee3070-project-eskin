@@ -1,4 +1,4 @@
-# ee3070-project-eskin
+# An open-source MIDI instrument based on the integrated flexible PET film pressure-sensing matrix and ESP32
 
 a repository for project design course ee3070, in cityuhk.
 
@@ -57,6 +57,9 @@ eskin\_project:.
 &nbsp;       FPGA\_Reader.cpp
 
 &nbsp;       FPGA\_Reader.h		//UART serial port receive function block (name being "FPGA\_Reader" is because we use a fpga dev board to send uart)
+&nbsp;       keyboard.cpp
+
+&nbsp;       keyboard.h		//keyboard control function，uses 4*4 keyboard from emakefun (keyboard itself sometimes fail to work)
 
 &nbsp;       pressure\_process.cpp
 
