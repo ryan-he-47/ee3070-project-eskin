@@ -101,7 +101,7 @@ void taskReceiveFPGA(void *pvParameters) {
         receiver.process();  // 不断处理串口数据
         
         int end=micros();//调试计时
-            //===========调试实现============/
+            /*/===========调试实现============/
                 Serial.print("latency : ");   //
                 int delay=end-start;          //
                 Serial.println(delay);        //
@@ -112,7 +112,7 @@ void taskReceiveFPGA(void *pvParameters) {
                 }                             //
                 Serial.print(", max latency:");//
                 Serial.println(maxDelay);      //
-            //================================//
+            //================================/*/
         vTaskDelay(1); // 使用vTaskDelay(1)让出CPU避免占用CPU
     }
 }

@@ -22,12 +22,47 @@ void debugSend(eskinMatrix* mat, const String& msg ){
 
 
 
+
+
+// process函数
+void PressToMIDI::process(eskinMatrix& pressMat) {
+  // 更新当前压力矩阵
+  _updatePress(pressMat);
+  keyAllocator();
+  // 业务逻辑写这里
+  //debugSend(&_pressNow,"frame done");//向电脑发送调试信息，可选矩阵和字符串
+
+
+  // 自动缓存当前帧
+  addCurrentFrameToCache();
+}
+
+
+//======================按键分配器,在这里添加新按键逻辑的调用===============================================
+void PressToMIDI::keyAllocator (){
+  for (int row = 0; row < MATRIX_ROWS; row++) {
+    for (int col = 0; col < MATRIX_COLS; col++) {
+        switch (_usingConfig.keyTypeMap[row][col]){
+          case KeyType::BASIC_INSTRUMENT :
+            _basicInstrument(row,col,_usingConfig.channelMap[row][col]);
+        }
+    }
+  }
+  
+}
+
+
+
+
+
+//==============================按键配置结构体和PressToMIDI类的初始化===============
 KeyConfig::KeyConfig(){
   for (int i = 0; i < MATRIX_ROWS; i++) {
     for (int j = 0; j < MATRIX_COLS; j++) {
         keyTypeMap[i][j] = KeyType::BASIC_INSTRUMENT;
         trigThreshMap[i][j]=37;
         pitchMap[i][j]=0;
+        channelMap[i][j]=1;
     }
   }
 }
@@ -39,8 +74,7 @@ PressToMIDI::PressToMIDI( QueueHandle_t output,const KeyConfig& cfg)
     for (int r = 0; r < MATRIX_ROWS; r++) {
       for (int c = 0; c < MATRIX_COLS; c++) {
         _cachePress[i][r][c] = 0;
-        _cacheBias[i][r][c][0] = 0;
-        _cacheBias[i][r][c][1] = 0;
+        
       }
     }
   }
@@ -48,43 +82,26 @@ PressToMIDI::PressToMIDI( QueueHandle_t output,const KeyConfig& cfg)
   for (int r = 0; r < MATRIX_ROWS; r++) {
     for (int c = 0; c < MATRIX_COLS; c++) {
       _KeyStateMap[r][c] = KeyState::FREE;
-      _keyBiasMap[r][c][0] = 0;
-      _keyBiasMap[r][c][1] = 0;
+      
     }
   }
 }
+//==============================================================
 
-// process函数
-void PressToMIDI::process(eskinMatrix& pressMat) {
-  // 更新当前压力矩阵
-  _updatePress(pressMat);
-  
-  // 业务逻辑写这里
-  //debugSend(&_pressNow,"frame done");//向电脑发送调试信息，可选矩阵和字符串
-  _basicInstrument(_midiQueue);
-  // 自动缓存当前帧
-  addCurrentFrameToCache();
-}
+
+
+
+
+
+
+//============================以下为缓存功能，不用管=========================================
 
 void PressToMIDI::_updatePress(eskinMatrix& pressMat){
-  for (int i = 0; i < MATRIX_ROWS; i++) {
-    for (int j = 0; j < MATRIX_COLS; j++) {
-      _pressNow[i][j] = pressMat[i][j];
-    }
-  }
+    memcpy(_pressNow, pressMat, sizeof(eskinMatrix)); 
 }
 // 私有拷贝函数
-void PressToMIDI::_copyCacheData(eskinMatrix dstPress, 
-                                 uint8_t dstBias[][MATRIX_COLS][2], 
-                                 const eskinMatrix srcPress, 
-                                 const uint8_t srcBias[][MATRIX_COLS][2]) {
-  for (int r = 0; r < MATRIX_ROWS; r++) {
-    for (int c = 0; c < MATRIX_COLS; c++) {
-      dstPress[r][c] = srcPress[r][c];
-      dstBias[r][c][0] = srcBias[r][c][0];
-      dstBias[r][c][1] = srcBias[r][c][1];
-    }
-  }
+void PressToMIDI::_copyCacheData(eskinMatrix dstPress, const eskinMatrix srcPress) {
+    memcpy(dstPress, srcPress, sizeof(eskinMatrix));  
 }
 int PressToMIDI::_getCacheIndex(int offset) {// 私有辅助：计算缓存索引
   // 边界检查
@@ -98,32 +115,13 @@ int PressToMIDI::_getCacheIndex(int offset) {// 私有辅助：计算缓存索�
 // 添加当前帧到缓存
 void PressToMIDI::addCurrentFrameToCache() {
   
-  _copyCacheData(_cachePress[_cacheWriteIdx], 
-                 _cacheBias[_cacheWriteIdx], 
-                 _pressNow, 
-                 _keyBiasMap);
+  _copyCacheData(_cachePress[_cacheWriteIdx], _pressNow);
   _cacheWriteIdx = (_cacheWriteIdx + 1) % CACHE_SIZE;
   if (_cacheValidCount < CACHE_SIZE) {
     _cacheValidCount++;
   }
 }
-// 获取最新帧
-bool PressToMIDI::getLatestCachedFrame() {
-  return getCachedFrame(0);
-}
-// 获取指定帧
-bool PressToMIDI::getCachedFrame(int offset) {
-  if (offset < 0 || offset >= _cacheValidCount) {
-    debugSend(nullptr, "获取缓存帧失败：参数错误/无有效帧");
-    return false;
-  }
-  int targetIdx = (_cacheWriteIdx - 1 - offset + CACHE_SIZE) % CACHE_SIZE;
-  _copyCacheData(_pressNow, 
-                 _keyBiasMap, 
-                 _cachePress[targetIdx], 
-                 _cacheBias[targetIdx]);
-  return true;
-}
+
 // 1. 获取缓存压力矩阵指针
 eskinMatrix* PressToMIDI::getCachePressPtr(int offset) {
   int targetIdx = _getCacheIndex(offset);
@@ -136,42 +134,3 @@ eskinMatrix* PressToMIDI::getCachePressPtr(int offset) {
 }
 
 // 2. 获取缓存偏移矩阵指针（三维数组指针）
-uint8_t (*PressToMIDI::getCacheBiasPtr(int offset))[MATRIX_COLS][2] {
-  int targetIdx = _getCacheIndex(offset);
-  if (targetIdx == -1) {
-    debugSend(nullptr, "缓存偏移矩阵越界：offset=" + String(offset));
-    return nullptr; // 越界返回空指针
-  }
-  // 直接返回缓存数组的指针（无拷贝）
-  return _cacheBias[targetIdx];
-}
-
-void PressToMIDI::_basicInstrument(QueueHandle_t output){
-  MIDIEvent event;
-  
-  static bool flagMap[16][16]={false};
-  
-  
-  for (int i = 0; i < MATRIX_ROWS; i++) {
-    for (int j = 0; j < MATRIX_COLS; j++) {
-      
-      if(_usingConfig.keyTypeMap[i][j]==KeyType::BASIC_INSTRUMENT){
-        event.channel=1;
-        event.data1=i+j+50;
-        event.data2=_pressNow[i][j];
-        if((_pressNow[i][j]>=(_usingConfig.trigThreshMap[i][j]+10))&&!flagMap[i][j]){
-          event.type=MIDIEventType::NoteOn;
-          flagMap[i][j]=1;
-          xQueueSendToBack(output, &event, 0);
-        }else if((_pressNow[i][j]<(_usingConfig.trigThreshMap[i][j]))&&flagMap[i][j]){
-          event.type=MIDIEventType::NoteOff;
-          flagMap[i][j]=0;
-          xQueueSendToBack(output, &event, 0);
-        }
-
-      }
-
-    }
-  }
-}
-  
