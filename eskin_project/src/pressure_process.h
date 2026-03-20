@@ -5,19 +5,21 @@
 #include <cstddef>
 #include <stdint.h>
 #include "freertos/queue.h"
+#include "src/midi_tool.h"
 //#include <lib/ESP32_Host_MIDI/src/ESP32_Host_MIDI.h>
 #define MATRIX_ROWS 16  // 矩阵行数
 #define MATRIX_COLS 16  // 矩阵列数
 typedef uint8_t eskinMatrix[MATRIX_ROWS][MATRIX_COLS]; //定义16*16大小的unit8_t数组类，名叫eskinMatrix
 
-void debugSend(eskinMatrix* mat=nullptr, const String& msg="" );//向电脑发送调试信息，可以发送矩阵和字符串
+
 
 //==================按键配置结构体======================
 enum class KeyType{
   NO_FUNCTION,
   BASIC_INSTRUMENT,
   PITCH_BEND,
-  PIANO
+  PIANO,
+  GUTAR
 };
 struct KeyConfig{//按键配置，每项都是16*16矩阵，储存每个键的配置
   eskinMatrix trigThreshMap;//触发阈值
@@ -41,9 +43,9 @@ enum class MIDIEventType : uint8_t {
 struct MIDIEvent {
     MIDIEventType type = MIDIEventType::NoteOff;
     uint8_t       channel=1;
-    uint8_t       data1;
-    uint8_t       data2;
-    uint8_t       MPEnote=128//有效值为0-127，不是mpe模式的按键设计不要动这个
+    uint8_t       data1=0;
+    uint8_t       data2=0;
+    uint8_t       MPEnote=128;//有效值为0-127，不是mpe模式的按键设计不要动这个
 };
 
 class PressToMIDI{//将压力信号魔法般地变成midi信号
@@ -52,6 +54,7 @@ class PressToMIDI{//将压力信号魔法般地变成midi信号
   eskinMatrix _pressNow;//现在的压力
   enum class KeyState{//定义枚举类来表示键的状态
     FREE,//未被按下
+    PRESSED,//已经按下
     PRESSING,//正在按下(压力值增大中)
     LIFTING,//正在抬起(压力值减小中)
     HOLD,//在一定压力值内波动
@@ -64,6 +67,7 @@ class PressToMIDI{//将压力信号魔法般地变成midi信号
   void keyAllocator();//按键分配器
   //==========不同的乐器按键=========================================================================
   void _basicInstrument(int row,int col,int channel);//这是能响就行基础款，不支持自定义键的音高
+  void _piano(int row,int col,int channel);//钢琴，基本上就是基础款，但是按下时候会等到压力由大变小的时候再发声
 
 
 

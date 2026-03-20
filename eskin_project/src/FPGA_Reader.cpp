@@ -44,7 +44,7 @@ void PressureMatrixReceiver::process() {
                     Serial.println("Error: Invalid pressure value received. Total errors: " + String(errorCount));
                 }else{
                 // 按原始逻辑存储矩阵
-                _pressure_grid[15-_current_col][_current_row] = value;
+                _pressure_grid[_current_row][_current_col] = value;
                 if (++_frame_counter >= 288) {
                     // 完整帧，通过输出流发送二进制矩阵
                     if(_matrixQueue!=nullptr){

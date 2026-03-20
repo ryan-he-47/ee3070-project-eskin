@@ -44,7 +44,7 @@ BLEMIDI_CREATE_INSTANCE(BLE_MIDI_DEVICE_NAME, MIDI)
 // ─────────────────────────────────────────────────────────────
 void bleMidiBegin(const char* deviceName) {
     BLEMIDI.setHandleConnected([]() {
-        Serial.println("[BLE MIDI] MacBook 已连接");
+        Serial.println("[BLE MIDI] 已连接");
     });
     BLEMIDI.setHandleDisconnected([]() {
         Serial.println("[BLE MIDI] 已断开，重新广播中...");

@@ -24,7 +24,7 @@
 // ── 宏定义：BLE 广播设备名称 ──────────────────────────────────
 // 可在编译时通过 -D BLE_MIDI_DEVICE_NAME="xxx" 覆盖
 #ifndef BLE_MIDI_DEVICE_NAME
-  #define BLE_MIDI_DEVICE_NAME  "ESP32-MIDI"
+  #define BLE_MIDI_DEVICE_NAME  "ESP32-MPE-MIDI"
 #endif
 
 // ── 公开接口声明 ──────────────────────────────────────────────

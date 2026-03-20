@@ -7,7 +7,7 @@ void PressToMIDI::_basicInstrument(int row,int col,int channel){//这是能响�
   QueueHandle_t output=_midiQueue;
   MIDIEvent event;
   static bool flagMap[16][16]={false};
-  const int deadzone=10;
+  const int deadzone=2;
 
   event.channel=channel;
   event.data1=row+col+48;//middle C =60, 该映射可以覆盖低一个八度和高一个多八度
@@ -29,6 +29,43 @@ void PressToMIDI::_basicInstrument(int row,int col,int channel){//这是能响�
 
 
 
+
+void PressToMIDI::_piano(int row,int col,int channel){//钢琴
+  QueueHandle_t output=_midiQueue;
+  MIDIEvent event;
+  eskinMatrix* lastFrame=getCachePressPtr(1);
+  if(lastFrame==nullptr){
+    return;
+  }
+  const int deadzone=2;
+  event.channel=channel;
+  event.data1=_usingConfig.pitchMap[row][col]+row+col+48;
+
+  if( (_pressNow[row][col]>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){
+    _KeyStateMap[row][col]=KeyState::PRESSING;
+  }
+  
+  
+  if((_pressNow[row][col]<(*lastFrame)[row][col])&&(_KeyStateMap[row][col]==KeyState::PRESSING)){
+      event.type=MIDIEventType::NoteOn;
+      event.data2=(*lastFrame)[row][col];
+      _KeyStateMap[row][col]=KeyState::LIFTING;
+      xQueueSendToBack(output, &event, 0);
+    }
+  
+  
+  
+  
+  if((_pressNow[row][col]<(_usingConfig.trigThreshMap[row][col]))&&(_KeyStateMap[row][col]==KeyState::LIFTING)){
+    event.type=MIDIEventType::NoteOff;
+    event.data2=0;
+    _KeyStateMap[row][col]=KeyState::FREE;
+    xQueueSendToBack(output, &event, 0);
+  
+
+  }
+  
+}
 
 
 

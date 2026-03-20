@@ -2,28 +2,6 @@
 #include "src/pressure_process.h"
 
 
-void debugSend(eskinMatrix* mat, const String& msg ){
-  const uint8_t matrixHeader[4] = {0x00, 0x10, 0x11, 0x20};//矩阵帧头
-  const uint8_t stringHeader[4] = {0x01, 0x02, 0x30, 0x22}; // 字符串帧头
-  if(mat!=nullptr){
-    Serial.write(matrixHeader, 4);//发送帧头
-    Serial.write((uint8_t*)mat, sizeof(eskinMatrix)); // 发送压力矩阵
-  }
-  if(!msg.isEmpty()){
-    uint16_t strLen = msg.length(); // 字符串长度（2字节
-    // 1. 发送字符串帧头
-    Serial.write(stringHeader, sizeof(stringHeader));
-    // 2. 发送字符串长度（小端模式，与Python端匹配）
-    Serial.write((uint8_t*)&strLen, sizeof(strLen));
-    // 3. 发送字符串字节数据
-    Serial.write(msg.c_str(), strLen);
-  }
-}
-
-
-
-
-
 // process函数
 void PressToMIDI::process(eskinMatrix& pressMat) {
   // 更新当前压力矩阵
@@ -44,7 +22,8 @@ void PressToMIDI::keyAllocator (){
     for (int col = 0; col < MATRIX_COLS; col++) {
         switch (_usingConfig.keyTypeMap[row][col]){
           case KeyType::BASIC_INSTRUMENT :
-            _basicInstrument(row,col,_usingConfig.channelMap[row][col]);
+            //_basicInstrument(row,col,_usingConfig.channelMap[row][col]);break;
+            _piano(row,col,_usingConfig.channelMap[row][col]);break;
         }
     }
   }
