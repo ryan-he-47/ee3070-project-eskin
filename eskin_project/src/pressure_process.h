@@ -19,13 +19,15 @@ enum class KeyType{
   BASIC_INSTRUMENT,
   PITCH_BEND,
   PIANO,
-  GUTAR
+  GUTAR,
+  VIOLIN
 };
 struct KeyConfig{//按键配置，每项都是16*16矩阵，储存每个键的配置
   eskinMatrix trigThreshMap;//触发阈值
   KeyType keyTypeMap[MATRIX_ROWS][MATRIX_COLS];//调用触发逻辑的种类标记
   eskinMatrix pitchMap;//每个键的音高
   eskinMatrix channelMap;
+  eskinMatrix PCMap;
   KeyConfig();//构造函数
 };
 extern KeyConfig defaultCfg;//默认配置
@@ -68,7 +70,7 @@ class PressToMIDI{//将压力信号魔法般地变成midi信号
   //==========不同的乐器按键=========================================================================
   void _basicInstrument(int row,int col,int channel);//这是能响就行基础款，不支持自定义键的音高
   void _piano(int row,int col,int channel);//钢琴，基本上就是基础款，但是按下时候会等到压力由大变小的时候再发声
-
+  void _violin(int row,int col,int channel);//钢琴，基本上就是基础款，但是按下时候会等到压力由大变小的时候再发声
 
 
 

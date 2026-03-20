@@ -6,6 +6,7 @@
 #include <src/pressure_process.h>
 #include "src/BLEMidi.h"
 #include "src/midi_tool.h"
+#include "src/MPE_manager.h"
 //#include <src/Keyboard.h>
 
 #define MATRIX_ROWS 16  // 矩阵行数
@@ -19,6 +20,8 @@ QueueHandle_t midiQueue = xQueueCreate(15, sizeof(MIDIEvent));
 PressureMatrixReceiver receiver(Serial1, Serial, matrixQueue);  // 接收串口 Serial1，输出到matrixQueue, 当queue句柄没有指定时，使用serial打印
 //实例化压力处理器
 PressToMIDI pressToMIDI(midiQueue);
+//实例化MPE通道分配器
+MPEManager mpeManager;
 //声明任务函数1
 void taskReceiveFPGA(void *pvParameters);
 void taskProcessMatrix(void *pvParameters);
@@ -32,9 +35,9 @@ void setup() {
   delay(1000);  //等待串口稳定
   Serial.println("===程序启动===");
   Serial.printf("Free heap:%d\n", ESP.getFreeHeap());
-
+  mpeManager.setAvaliableChannel(2,14);
   receiver.begin(460800, 16, 17);  // RX=16, TX=17
-
+  
   /*
     if (!keyboard.begin()) {// 键盘初始化
         Serial.println(F("Keyboard init failed"));
@@ -147,7 +150,8 @@ void taskSendMIDI(void *pvParameters) {
   while (1) {
     if (xQueueReceive(midiQueue, &eventBuf, portMAX_DELAY) == pdPASS) {
       //Serial.println(midiEventToString(eventBuf));
-
+      
+      mpeManager.assignChannel(&eventBuf);
       midiEventEncoder(eventBuf, rawMIDI);
       Serial.write(rawMIDI,3);
       int start=micros();

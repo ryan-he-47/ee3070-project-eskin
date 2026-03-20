@@ -12,8 +12,8 @@ typedef uint8_t eskinMatrix[MATRIX_ROWS][MATRIX_COLS]; //定义16*16大小的uni
 
 class MPEManager {
   public:
-    void setAvaliableChannel(int end=15);
     int16_t noteList[16];
+    void setAvaliableChannel(int start, int end=15);
     bool assignChannel(MIDIEvent* event);
 
   

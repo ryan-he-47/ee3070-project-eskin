@@ -22,7 +22,9 @@ void PressToMIDI::keyAllocator (){
     for (int col = 0; col < MATRIX_COLS; col++) {
         switch (_usingConfig.keyTypeMap[row][col]){
           case KeyType::BASIC_INSTRUMENT :
-            //_basicInstrument(row,col,_usingConfig.channelMap[row][col]);break;
+            _basicInstrument(row,col,_usingConfig.channelMap[row][col]);break;
+            
+          case KeyType::PIANO :
             _piano(row,col,_usingConfig.channelMap[row][col]);break;
         }
     }
@@ -42,6 +44,7 @@ KeyConfig::KeyConfig(){
         trigThreshMap[i][j]=37;
         pitchMap[i][j]=0;
         channelMap[i][j]=1;
+        PCMap[i][j]=0;
     }
   }
 }

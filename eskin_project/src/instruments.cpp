@@ -40,7 +40,7 @@ void PressToMIDI::_piano(int row,int col,int channel){//钢琴
   const int deadzone=2;
   event.channel=channel;
   event.data1=_usingConfig.pitchMap[row][col]+row+col+48;
-
+  event.MPEnote=_usingConfig.pitchMap[row][col]+row+col+48;
   if( (_pressNow[row][col]>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){
     _KeyStateMap[row][col]=KeyState::PRESSING;
   }
@@ -66,13 +66,3 @@ void PressToMIDI::_piano(int row,int col,int channel){//钢琴
   }
   
 }
-
-
-
-
-
-
-
-
-
-
