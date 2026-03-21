@@ -11,7 +11,7 @@ void PressToMIDI::_basicInstrument(int row,int col,int channel){//这是能响�
 
   event.channel=channel;
   event.data1=row+col+48;//middle C =60, 该映射可以覆盖低一个八度和高一个多八度
-  event.data2=80;//能响就行
+  event.data2=_pressNow[row][col];//能响就行
   if((_pressNow[row][col]>=(_usingConfig.trigThreshMap[row][col]+deadzone))&&!flagMap[row][col]){
     event.type=MIDIEventType::NoteOn;
     flagMap[row][col]=1;
@@ -39,16 +39,20 @@ void PressToMIDI::_piano(int row,int col,int channel){//钢琴
   }
   const int deadzone=2;
   event.channel=channel;
-  event.data1=_usingConfig.pitchMap[row][col]+row+col+48;
-  event.MPEnote=_usingConfig.pitchMap[row][col]+row+col+48;
-  if( (_pressNow[row][col]>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){
+  event.data1=_usingConfig.pitchMap[row][col];
+  event.MPEnote=_usingConfig.pitchMap[row][col];
+  int currentPressure=_pressNow[row][col]+_pressNow[row][col+1]+_pressNow[row+1][col]+_pressNow[row+1][col+1]-35*3;//4键平均压力
+  int lastPressure=(*lastFrame)[row][col]+(*lastFrame)[row][col+1]+(*lastFrame)[row+1][col]+(*lastFrame)[row+1][col+1]-35*3;
+  event.data2=currentPressure;
+
+  if( (currentPressure>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){
     _KeyStateMap[row][col]=KeyState::PRESSING;
   }
   
   
-  if((_pressNow[row][col]<(*lastFrame)[row][col])&&(_KeyStateMap[row][col]==KeyState::PRESSING)){
+  if((currentPressure<lastPressure)&&(_KeyStateMap[row][col]==KeyState::PRESSING)){
       event.type=MIDIEventType::NoteOn;
-      event.data2=(*lastFrame)[row][col];
+      event.data2=lastPressure;
       _KeyStateMap[row][col]=KeyState::LIFTING;
       xQueueSendToBack(output, &event, 0);
     }
@@ -56,7 +60,7 @@ void PressToMIDI::_piano(int row,int col,int channel){//钢琴
   
   
   
-  if((_pressNow[row][col]<(_usingConfig.trigThreshMap[row][col]))&&(_KeyStateMap[row][col]==KeyState::LIFTING)){
+  if((currentPressure<(_usingConfig.trigThreshMap[row][col]))&&(_KeyStateMap[row][col]==KeyState::LIFTING)){
     event.type=MIDIEventType::NoteOff;
     event.data2=0;
     _KeyStateMap[row][col]=KeyState::FREE;

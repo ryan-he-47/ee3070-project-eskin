@@ -26,6 +26,7 @@ void PressToMIDI::keyAllocator (){
             
           case KeyType::PIANO :
             _piano(row,col,_usingConfig.channelMap[row][col]);break;
+          
         }
     }
   }
@@ -41,14 +42,17 @@ KeyConfig::KeyConfig(){
   for (int i = 0; i < MATRIX_ROWS; i++) {
     for (int j = 0; j < MATRIX_COLS; j++) {
         keyTypeMap[i][j] = KeyType::BASIC_INSTRUMENT;
-        trigThreshMap[i][j]=37;
+        trigThreshMap[i][j]=36;
         pitchMap[i][j]=0;
         channelMap[i][j]=1;
-        PCMap[i][j]=0;
+        
     }
+    PCMap[i]=0;
   }
 }
+
 KeyConfig defaultCfg;
+
 PressToMIDI::PressToMIDI( QueueHandle_t output,const KeyConfig& cfg) 
   : _usingConfig(cfg), _midiQueue(output) {
   // 初始化缓存为默认值
@@ -71,9 +75,17 @@ PressToMIDI::PressToMIDI( QueueHandle_t output,const KeyConfig& cfg)
 //==============================================================
 
 
+//==============================重置cfg==========================
 
-
-
+void PressToMIDI::setConfig(const KeyConfig& cfg) {
+    _usingConfig = cfg;
+    // 重置所有按键状态
+    for (int r = 0; r < MATRIX_ROWS; r++) {
+        for (int c = 0; c < MATRIX_COLS; c++) {
+            _KeyStateMap[r][c] = KeyState::FREE;
+        }
+    }
+}
 
 
 //============================以下为缓存功能，不用管=========================================

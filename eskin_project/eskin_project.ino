@@ -4,10 +4,12 @@
 
 #include <src/FPGA_Reader.h>
 #include <src/pressure_process.h>
-#include "src/BLEMidi.h"
+//#include "src/BLEMidi.h"
 #include "src/midi_tool.h"
 #include "src/MPE_manager.h"
-//#include <src/Keyboard.h>
+#include <src/Keyboard.h>
+
+#include <src/config.h>
 
 #define MATRIX_ROWS 16  // 矩阵行数
 #define MATRIX_COLS 16  // 矩阵列数
@@ -31,18 +33,19 @@ void taskCheckKeyboard(void *pvParameters);
 void setup() {
   Serial.begin(115200);
 
-  bleMidiBegin("ESP32-MIDI");
+  //bleMidiBegin("ESP32-MIDI");
   delay(1000);  //等待串口稳定
   Serial.println("===程序启动===");
   Serial.printf("Free heap:%d\n", ESP.getFreeHeap());
   mpeManager.setAvaliableChannel(2,14);
-  receiver.begin(460800, 16, 17);  // RX=16, TX=17
+  receiver.begin(460800, 20, 21);  // RX=16, TX=17
   
-  /*
-    if (!keyboard.begin()) {// 键盘初始化
-        Serial.println(F("Keyboard init failed"));
-        while (1);  
-    }*/
+  initAllConfigs();
+
+  if (!keyboard.begin()) {// 键盘初始化
+      Serial.println(F("Keyboard init failed"));
+      while (1);  
+  }
 
   if (matrixQueue == NULL) {  //处理队列创建失败
     Serial.println("Failed to create queue");
@@ -78,7 +81,7 @@ void setup() {
     NULL,
     0);
 
-  /*xTaskCreatePinnedToCore(
+  xTaskCreatePinnedToCore(
         taskCheckKeyboard,
         "Continuously check keyboard",
         1024*8,
@@ -86,7 +89,7 @@ void setup() {
         1,
         NULL,
         1
-    );*/
+    );
 }
 
 
@@ -149,21 +152,22 @@ void taskSendMIDI(void *pvParameters) {
   uint8_t rawMIDI[3];
   while (1) {
     if (xQueueReceive(midiQueue, &eventBuf, portMAX_DELAY) == pdPASS) {
-      //Serial.println(midiEventToString(eventBuf));
+      
       
       mpeManager.assignChannel(&eventBuf);
       midiEventEncoder(eventBuf, rawMIDI);
       Serial.write(rawMIDI,3);
       int start=micros();
-      bleMidiSendEvent(eventBuf);
+      //bleMidiSendEvent(eventBuf);
+      //Serial.println(midiEventToString(eventBuf));
       int end=micros();
     }
   }
 }
-/*
+
 void taskCheckKeyboard(void *pvParameters){
     while(1){
-        //keyboard.tickAndProcess();
+        keyboard.tickAndProcess();
         vTaskDelay(125);
     }
-}*/
+}
