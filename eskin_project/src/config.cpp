@@ -19,9 +19,9 @@ void initAllConfigs() {
      for (int r = 0; r < MATRIX_ROWS; r++) {
         for (int c = 0; c < MATRIX_COLS; c++) {
             configs[0].keyTypeMap[r][c] =KeyType::NO_FUNCTION;
-            configs[0].trigThreshMap[r][c] = 40;
+            configs[0].trigThreshMap[r][c] = 37;
             if(r==14){
-                configs[0].trigThreshMap[r][c] = 50;
+                configs[0].trigThreshMap[r][c] = 47;
             } 
             }
             
@@ -35,8 +35,6 @@ void initAllConfigs() {
         configs[0].pitchMap[4][c] = blackKeys[c]+72;
         configs[0].pitchMap[2][c] = whiteKeys[c]+84;
         configs[0].pitchMap[0][c] = blackKeys[c]+84;
-
-
         configs[0].keyTypeMap[14][c] = whiteKeyType[c];
         configs[0].keyTypeMap[12][c] = blackKeyType[c];
         configs[0].keyTypeMap[10][c] = whiteKeyType[c];
@@ -54,7 +52,7 @@ void initAllConfigs() {
     // ========== 配置 1： ==========
     for (int r = 0; r < MATRIX_ROWS; r++) {
         for (int c = 0; c < MATRIX_COLS; c++) {
-            configs[1].keyTypeMap[r][c] = KeyType::BASIC_INSTRUMENT;
+            configs[1].keyTypeMap[r][c] = KeyType::SINGLE_POINT;
             configs[1].trigThreshMap[r][c] = 37;
             configs[1].pitchMap[r][c] = r * 16 + c;
             configs[1].channelMap[r][c] = 1;
@@ -64,9 +62,9 @@ void initAllConfigs() {
     // ========== 配置 2： ==========
     for (int r = 0; r < MATRIX_ROWS; r++) {
         for (int c = 0; c < MATRIX_COLS; c++) {
-            configs[2].keyTypeMap[r][c] = KeyType::PIANO;
-            configs[2].trigThreshMap[r][c] = 37;
-            configs[2].pitchMap[r][c] = r * 16 + c;
+            configs[2].keyTypeMap[r][c] = KeyType::BASIC_MPE;
+            configs[2].trigThreshMap[r][c] = 40;
+            configs[2].pitchMap[r][c] = r + c+48;
             configs[2].channelMap[r][c] = 1;
         }
     }

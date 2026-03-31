@@ -13,7 +13,7 @@ void MPEManager::setAvaliableChannel(int start, int end){
 }
 
 bool MPEManager::assignChannel(MIDIEvent* event){
-  if(event->MPEnote>=128){return false;}
+  if(event->MPEnote>=128){return true;}
   
   if(event->type==MIDIEventType::NoteOn){
     for(int i=0;i<=15;i++){

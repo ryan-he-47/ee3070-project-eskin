@@ -5,8 +5,8 @@ extern PressToMIDI pressToMIDI;
 
 
 #if defined(ESP32)
-constexpr gpio_num_t kI2cPinSda = GPIO_NUM_7;
-constexpr gpio_num_t kI2cPinScl = GPIO_NUM_8;
+constexpr gpio_num_t kI2cPinSda = GPIO_NUM_1;
+constexpr gpio_num_t kI2cPinScl = GPIO_NUM_2;
 #endif
 
 Keyboard::Keyboard(TwoWire &wire, uint8_t i2cAddr)

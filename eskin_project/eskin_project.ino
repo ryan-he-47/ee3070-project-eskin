@@ -4,7 +4,7 @@
 
 #include <src/FPGA_Reader.h>
 #include <src/pressure_process.h>
-//#include "src/BLEMidi.h"
+#include "src/BLEMidi.h"
 #include "src/midi_tool.h"
 #include "src/MPE_manager.h"
 #include <src/Keyboard.h>
@@ -17,7 +17,7 @@
 typedef uint8_t eskinMatrix[MATRIX_ROWS][MATRIX_COLS];
 //声明压力矩阵队列句柄
 QueueHandle_t matrixQueue = xQueueCreate(5, sizeof(eskinMatrix));  // 队列长度，单个矩阵的字节数（16*16=256字节）;  //定义矩阵队列句柄
-QueueHandle_t midiQueue = xQueueCreate(15, sizeof(MIDIEvent));
+QueueHandle_t midiQueue = xQueueCreate(32, sizeof(MIDIEvent));
 //实例化FPGA接收器
 PressureMatrixReceiver receiver(Serial1, Serial, matrixQueue);  // 接收串口 Serial1，输出到matrixQueue, 当queue句柄没有指定时，使用serial打印
 //实例化压力处理器
@@ -31,14 +31,14 @@ void taskSendMIDI(void *pvParameters);
 void taskCheckKeyboard(void *pvParameters);
 
 void setup() {
-  Serial.begin(115200);
-
-  //bleMidiBegin("ESP32-MIDI");
+  Serial.begin(460800);
+  Serial2.begin(115200,SERIAL_8N1,41,42);
+  bleMidiBegin("ESP32-MIDI");
   delay(1000);  //等待串口稳定
   Serial.println("===程序启动===");
   Serial.printf("Free heap:%d\n", ESP.getFreeHeap());
   mpeManager.setAvaliableChannel(2,14);
-  receiver.begin(460800, 20, 21);  // RX=16, TX=17
+  receiver.begin(460800, 47, 21);  // RX=47, TX=21
   
   initAllConfigs();
 
@@ -126,41 +126,42 @@ void taskReceiveFPGA(void *pvParameters) {
 
 void taskProcessMatrix(void *pvParameters) {
   eskinMatrix matrixBuf;
-  //int maxDelay=0;
+  int maxDelay=0;
   while (1) {
     // 阻塞等待队列中的矩阵数据
     if (xQueueReceive(matrixQueue, matrixBuf, portMAX_DELAY) == pdPASS) {
       //debugSend(&matrixBuf);
-      //int start=micros();//调试计时
+      int start=micros();//调试计时
       pressToMIDI.process(matrixBuf);
-      //int end=micros();//调试计时
-      /*/===========调试实现============/
-                Serial.print("latency : ");   //
+      int end=micros();//调试计时
+      //===========调试实现============/
+                //Serial.print("latency : ");   //
                 int delay=end-start;          //
-                Serial.println(delay);        //
+                //Serial.println(delay);        //
                 if(delay>maxDelay){           //
-                    maxDelay=delay;           //
+                    maxDelay=delay;
+                    Serial.print(", max latency:");//
+                    Serial.println(maxDelay);           //
                 }                             //
-                Serial.print(", max latency:");//
-                Serial.println(maxDelay);      //
-            //================================/*/
+                     //
+            //================================//
     }
   }
 }
 void taskSendMIDI(void *pvParameters) {
   MIDIEvent eventBuf;
-  uint8_t rawMIDI[3];
+  
   while (1) {
     if (xQueueReceive(midiQueue, &eventBuf, portMAX_DELAY) == pdPASS) {
+      uint8_t rawMIDI[3];
+      
+      if(mpeManager.assignChannel(&eventBuf)){
+        midiEventEncoder(eventBuf, rawMIDI);
+        Serial2.write(rawMIDI,3);
+        bleMidiSendEvent(eventBuf);
+      }
       
       
-      mpeManager.assignChannel(&eventBuf);
-      midiEventEncoder(eventBuf, rawMIDI);
-      Serial.write(rawMIDI,3);
-      int start=micros();
-      //bleMidiSendEvent(eventBuf);
-      //Serial.println(midiEventToString(eventBuf));
-      int end=micros();
     }
   }
 }

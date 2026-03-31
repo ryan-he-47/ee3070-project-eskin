@@ -15,7 +15,7 @@ class MPEManager {
     int16_t noteList[16];
     void setAvaliableChannel(int start, int end=15);
     bool assignChannel(MIDIEvent* event);
-
+    
   
 };
 
