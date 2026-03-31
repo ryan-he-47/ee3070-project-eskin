@@ -37,24 +37,21 @@ void midiEventEncoder(const MIDIEvent& event,uint8_t midiFrame[3]){
     // ========== 步骤3：填充3字节MIDI帧 ==========
     midiFrame[0] = statusByte; // 第1字节：状态字节
     midiFrame[1] = validData1; // 第2字节：数据1
-
-    // 特殊处理：ProgramChange仅2字节，数据2补0；其他事件用validData2
-    if (event.type == MIDIEventType::ProgramChange) {
-        midiFrame[2] = 0;
-    } else {
-        midiFrame[2] = validData2;
-    }
+    midiFrame[2] = validData2;
+    
 }
 
 
 String getMidiEventTypeStr(MIDIEventType type) {
     switch(type) {
-        case MIDIEventType::NoteOn: return        "NoteOn       ";
-        case MIDIEventType::NoteOff: return       "NoteOff      ";
-        case MIDIEventType::ControlChange: return "ControlChange";
-        case MIDIEventType::ProgramChange: return "ProgramChange";
-        case MIDIEventType::PitchBend: return     "PitchBend    ";
-        default: return                           "Unknown      ";
+        case MIDIEventType::NoteOn: return              "NoteOn             ";
+        case MIDIEventType::NoteOff: return             "NoteOff            ";
+        case MIDIEventType::ControlChange: return       "ControlChange      ";
+        case MIDIEventType::ProgramChange: return       "ProgramChange      ";
+        case MIDIEventType::PitchBend: return           "PitchBend          ";
+        case MIDIEventType::PolyAT: return "PolyphonicAftertouch";
+        case MIDIEventType::ChannelAT: return     "ChannelPressure    ";
+        default: return                                   "Unknown            ";
     }
 }
 String midiEventToString(const MIDIEvent& event) {
@@ -66,7 +63,7 @@ String midiEventToString(const MIDIEvent& event) {
     // 步骤2：计算3字节MIDI帧
     uint8_t eventTypeVal = static_cast<uint8_t>(event.type);
     uint8_t statusByte = (eventTypeVal & 0xF0) | ((validChannel - 1) & 0x0F);
-    uint8_t data2Byte = (event.type == MIDIEventType::ProgramChange) ? 0 : validData2;
+    uint8_t data2Byte = (event.type == MIDIEventType::ProgramChange || event.type == MIDIEventType::ChannelAT) ? 0 : validData2;
 
     // 步骤3：格式化字符串（状态字节16进制，数据位10进制）
     String readableStr = "";
@@ -87,7 +84,11 @@ String midiEventToString(const MIDIEvent& event) {
         readableStr += " (程序号。。)| ";
     } else if (event.type == MIDIEventType::PitchBend) {
         readableStr += " (弯音低七位)| ";
-    }else{
+    } else if (event.type == MIDIEventType::PolyAT) {
+        readableStr += " (音符编号。)| ";
+    } else if (event.type == MIDIEventType::ChannelAT) {
+        readableStr += " (压力值。。)| ";
+    } else {
         readableStr += " (未定义。。)| ";
     }
 
@@ -103,7 +104,11 @@ String midiEventToString(const MIDIEvent& event) {
         readableStr += " (保留值。。)";
     } else if (event.type == MIDIEventType::PitchBend) {
         readableStr += " (弯音高七位)";
-    }else{
+    } else if (event.type == MIDIEventType::PolyAT) {
+        readableStr += " (压力值。。。)";
+    } else if (event.type == MIDIEventType::ChannelAT) {
+        readableStr += " (N/A)"; // ChannelPressure只有1个数据字节
+    } else {
         readableStr += " (未定义。。)";
     }
 

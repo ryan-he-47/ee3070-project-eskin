@@ -20,12 +20,16 @@ void PressToMIDI::process(eskinMatrix& pressMat) {
 void PressToMIDI::keyAllocator (){
   for (int row = 0; row < MATRIX_ROWS; row++) {
     for (int col = 0; col < MATRIX_COLS; col++) {
+        if(_sensorMap[row][col]!=0){continue;}
         switch (_usingConfig.keyTypeMap[row][col]){
           case KeyType::BASIC_INSTRUMENT :
             _basicInstrument(row,col,_usingConfig.channelMap[row][col]);break;
-            
           case KeyType::PIANO :
             _piano(row,col,_usingConfig.channelMap[row][col]);break;
+          case KeyType::BASIC_MPE :
+            _basicMPE(row,col,_usingConfig.channelMap[row][col]);break;
+          case KeyType::SINGLE_POINT :
+          _singlePoint(row,col,_usingConfig.channelMap[row][col]);break;
           
         }
     }
@@ -45,9 +49,8 @@ KeyConfig::KeyConfig(){
         trigThreshMap[i][j]=36;
         pitchMap[i][j]=0;
         channelMap[i][j]=1;
-        
+
     }
-    PCMap[i]=0;
   }
 }
 
@@ -68,22 +71,69 @@ PressToMIDI::PressToMIDI( QueueHandle_t output,const KeyConfig& cfg)
   for (int r = 0; r < MATRIX_ROWS; r++) {
     for (int c = 0; c < MATRIX_COLS; c++) {
       _KeyStateMap[r][c] = KeyState::FREE;
-      
+      _sensorMap[r][c]=0;
     }
   }
 }
-//==============================================================
+//===================偏移量计算和按键屏蔽==================================
+
+void PressToMIDI::_banKeys(bool ban, int row, int col,int u, int d, int l, int r){
+  if(ban){
+    for(int i = -u; i <= d; i++){
+      for(int j = -l; j <= r; j++){
+        _sensorMap[row+i][col+j]++;
+      }
+    }
+    _sensorMap[row][col]--;
+  }else{
+    for(int i = -u; i <= d; i++){
+      for(int j = -l; j <= r; j++){
+        _sensorMap[row+i][col+j]--;
+      }
+    }
+    _sensorMap[row][col]++;
+  }
+}
+
+bool PressToMIDI::_weightBias(float& x, float& y, int row, int col,float& meanF,int u, int d, int l, int r){
+  float xnume=0.0; 
+  float denom=0.001;
+  float ynume=0.0; 
+  if(row-u<0||row+d>15||col-l<0||col+r>15){return false;}
+  for(int i = -u; i <= d; i++){
+    for(int j = -l; j <= r; j++){
+
+      xnume=xnume+j*(_pressNow[row+i][col+j]-35);
+      ynume=ynume+i*(_pressNow[row+i][col+j]-35);
+      denom=denom+(_pressNow[row+i][col+j]-35);
+
+    }
+  }
+  float raw_x = xnume / denom;
+  float raw_y = ynume / denom;
+  x = 2 * (raw_x + l) / (l + r) - 1.0;
+  y = 2 * (raw_y + u) / (u + d) - 1.0;   // 垂直：上→下 映射 0→1
+  
+  meanF=denom;//((u+d+1.0)*(r+l+1.0));
+  Serial.println(meanF);
+  return true;
+}
 
 
 //==============================重置cfg==========================
 
 void PressToMIDI::setConfig(const KeyConfig& cfg) {
     _usingConfig = cfg;
+    MIDIEvent noteOff;
+    noteOff.type = MIDIEventType::NoteOff;
     // 重置所有按键状态
     for (int r = 0; r < MATRIX_ROWS; r++) {
+      noteOff.channel=r;
+      xQueueSendToBack(_midiQueue, &noteOff, 0);
         for (int c = 0; c < MATRIX_COLS; c++) {
             _KeyStateMap[r][c] = KeyState::FREE;
         }
+
     }
 }
 
