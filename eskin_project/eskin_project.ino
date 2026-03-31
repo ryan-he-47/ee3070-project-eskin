@@ -38,7 +38,7 @@ void setup() {
   Serial.println("===程序启动===");
   Serial.printf("Free heap:%d\n", ESP.getFreeHeap());
   mpeManager.setAvaliableChannel(2,14);
-  receiver.begin(460800, 20, 21);  // RX=16, TX=17
+  receiver.begin(460800, 47, 21);  // RX=47, TX=21
   
   initAllConfigs();
 
