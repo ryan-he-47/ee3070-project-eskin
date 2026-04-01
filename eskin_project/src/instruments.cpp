@@ -115,7 +115,10 @@ void PressToMIDI::_basicMPE(int row,int col,int channel){//MPE
     float xbias;
     float ybias;
     float meanF;
-    _weightBias(xbias,ybias,row,col,meanF);
+    if (!_weightBias(xbias,ybias,row,col,meanF)) {
+      ybias = 0.0f;
+      meanF = 0.0f;
+    }
     event.type=MIDIEventType::ChannelAT;
     event.data1=meanF*9;
     event.data2=event.data1;
@@ -129,6 +132,11 @@ void PressToMIDI::_basicMPE(int row,int col,int channel){//MPE
     xQueueSendToBack(output, &event, 0);
     }
 }
+
+
+
+
+
 void PressToMIDI::_singlePoint(int row,int col,int channel){
   if(row==0&&col==0){
     QueueHandle_t output=_midiQueue;
@@ -139,25 +147,35 @@ void PressToMIDI::_singlePoint(int row,int col,int channel){
     float ybias;
     float meanF;
     int max=0;
-    _weightBias(xbias,ybias,row,col,meanF,0,15,0,15);
+    if (!_weightBias(xbias,ybias,row,col,meanF,0,15,0,15)) {
+      xbias = 0.0f;
+      ybias = 0.0f;
+      meanF = 0.0f;
+    }
     event.channel=channel;
     event.data1=60;
-    event.data2=max;
+  
     
-    _banKeys(true,row,col,0,15,0,15);
+    
     for (int r = 0; r < MATRIX_ROWS; r++) {
       for (int c = 0; c < MATRIX_COLS; c++) {
         if(_pressNow[r][c]>=max){max=_pressNow[r][c];}
       }
     }
+
+     event.data2=max/2;
+
+
     if( (max>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){
       event.type=MIDIEventType::NoteOn;
       xQueueSendToBack(output, &event, 0);
+
       _KeyStateMap[row][col]=KeyState::PRESSING;
     }else if((max<(_usingConfig.trigThreshMap[row][col]))&&(_KeyStateMap[row][col]==KeyState::PRESSING)){
       event.type=MIDIEventType::NoteOff;
       event.data2=0;
       xQueueSendToBack(output, &event, portMAX_DELAY);
+
       _KeyStateMap[row][col]=KeyState::FREE;
     }else if(_KeyStateMap[row][col]==KeyState::PRESSING){
     
@@ -174,5 +192,119 @@ void PressToMIDI::_singlePoint(int row,int col,int channel){
     xQueueSendToBack(output, &event, 0);
     }
 
+  }
+}
+
+
+
+void PressToMIDI::_violin(int row,int col,int channel){
+  if(row==15 && (col==0||col==4||col==8||col==12)){
+    QueueHandle_t output=_midiQueue;
+    MIDIEvent event;
+    
+    const int deadzone=2;
+    float xbias;
+    float ybias;
+    float meanF;
+    int max=0;
+    // 计算靠近仪器位置的偏移；向上扩展15行，向下不扩展（row==15）
+    if (!_weightBias(xbias,ybias,row,col,meanF,15,0,0,3)) {
+      return;
+    }
+    event.channel=channel;
+    event.data1= _usingConfig.pitchMap[row][col];
+  
+    
+    
+    for (int r = 0; r < MATRIX_ROWS; r++) {
+      for (int c = col; c < col+3; c++) {
+        if(_pressNow[r][c]>=max){max=_pressNow[r][c];}
+      }
+    }
+
+     event.data2=max/2;
+
+
+    if( (max>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){
+      event.type=MIDIEventType::NoteOn;
+      xQueueSendToBack(output, &event, 0);
+
+      _KeyStateMap[row][col]=KeyState::PRESSING;
+    }else if((max<(_usingConfig.trigThreshMap[row][col]))&&(_KeyStateMap[row][col]==KeyState::PRESSING)){
+      event.type=MIDIEventType::NoteOff;
+      event.data2=0;
+      xQueueSendToBack(output, &event, portMAX_DELAY);
+
+      _KeyStateMap[row][col]=KeyState::FREE;
+    }else if(_KeyStateMap[row][col]==KeyState::PRESSING){
+    
+    event.type=MIDIEventType::ChannelAT;
+    event.data1=max;
+    event.data2=event.data1;
+    xQueueSendToBack(output, &event, 0);
+    
+    uint8_t pb1, pb2;
+    mapFloatToPitchBend(ybias, pb1, pb2);
+    event.type = MIDIEventType::PitchBend;
+    event.data1 = pb1;
+    event.data2 = pb2;
+    xQueueSendToBack(output, &event, 0);
+    }
+
+  }
+}
+
+
+void PressToMIDI::_drum(int row,int col,int channel){
+  if(row==0&&col==0){
+    QueueHandle_t output=_midiQueue;
+    MIDIEvent event;
+    const int deadzone = 2;
+
+    // 全局最大压力 -> 声音响度（velocity）
+    int maxPressure = 0;
+    for (int r = 0; r < MATRIX_ROWS; r++) {
+      for (int c = 0; c < MATRIX_COLS; c++) {
+        if (_pressNow[r][c] > maxPressure) {
+          maxPressure = _pressNow[r][c];
+        }
+      }
+    }
+
+    // 允许按键中心区到外缘亮度变化
+    float xbias = 0.0f, ybias = 0.0f, meanF = 0.0f;
+    if (!_weightBias(xbias, ybias, row, col, meanF, 0, MATRIX_ROWS-1, 0, MATRIX_COLS-1)) {
+      xbias = 0.0f;
+      ybias = 0.0f;
+    }
+
+    float dist = sqrtf(xbias*xbias + ybias*ybias) / 1.41421356f;
+    float brightnessf = 0.2f + 0.8f * dist; // 中心低 0.2, 边缘高 1.0
+    uint8_t brightness = (uint8_t)constrain((int)floorf(brightnessf * 127.0f), 1, 127);
+
+    uint8_t velocity = (uint8_t)constrain(maxPressure/2, 1, 127);
+    const uint8_t drumNote = 38;
+
+    event.channel = channel;
+    event.data1 = drumNote;
+    event.data2 = velocity;
+
+    if ((maxPressure >= (_usingConfig.trigThreshMap[row][col] + deadzone)) && (_KeyStateMap[row][col] == KeyState::FREE)) {
+      event.type = MIDIEventType::NoteOn;
+      xQueueSendToBack(output, &event, 0);
+      _KeyStateMap[row][col] = KeyState::PRESSING;
+    } else if ((maxPressure < _usingConfig.trigThreshMap[row][col]) && (_KeyStateMap[row][col] == KeyState::PRESSING)) {
+      event.type = MIDIEventType::NoteOff;
+      event.data2 = 0;
+      xQueueSendToBack(output, &event, portMAX_DELAY);
+      _KeyStateMap[row][col] = KeyState::FREE;
+
+
+    } else if (_KeyStateMap[row][col] == KeyState::PRESSING) {
+        event.type = MIDIEventType::ControlChange;
+        event.data1 = 74;  // 亮度控制
+        event.data2 = brightness;
+      xQueueSendToBack(output, &event, 0);
+    }
   }
 }

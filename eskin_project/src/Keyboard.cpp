@@ -3,7 +3,6 @@
 #include "config.h"
 extern PressToMIDI pressToMIDI;   
 
-
 #if defined(ESP32)
 constexpr gpio_num_t kI2cPinSda = GPIO_NUM_1;
 constexpr gpio_num_t kI2cPinScl = GPIO_NUM_2;
@@ -38,12 +37,26 @@ void Keyboard::processKeys() const {
 
     if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKey1)) {
         newConfig = 0;
+
     } else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKey2)) {
         newConfig = 1;
+
+
     } else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKey3)) {
         newConfig = 2;
+
+    } else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKey4)) {
+        newConfig = 3;
+    }else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKey6)) {
+        newConfig = 4;
+    }else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKeyA)) {
+        //newConfig = ;
+    }else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKeyB)) {
+        //newConfig = ;
+    }else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKeyC)) {
+        //newConfig = ;
     }
-    // 可继续添加更多按键映射
+    // 
 
     if (newConfig != -1 && newConfig != currentConfig) {
         currentConfig = newConfig;

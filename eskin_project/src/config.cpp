@@ -1,7 +1,7 @@
 #include "config.h"
 
 // 定义配置数量
-const int NUM_CONFIGS = 3;
+const int NUM_CONFIGS = 5;
 
 // 定义配置数组（注意：这里只是声明空间，实际内容在 initAllConfigs 中填充）
 KeyConfig configs[NUM_CONFIGS];
@@ -23,8 +23,9 @@ void initAllConfigs() {
             if(r==14){
                 configs[0].trigThreshMap[r][c] = 47;
             } 
+
             }
-            
+            configs[0].channelPC[r]=0;
         }
     for (int c = 0; c < MATRIX_COLS; c++) {
         configs[0].pitchMap[14][c] = whiteKeys[c]+48;
@@ -52,12 +53,20 @@ void initAllConfigs() {
     // ========== 配置 1： ==========
     for (int r = 0; r < MATRIX_ROWS; r++) {
         for (int c = 0; c < MATRIX_COLS; c++) {
-            configs[1].keyTypeMap[r][c] = KeyType::SINGLE_POINT;
+            configs[1].keyTypeMap[r][c] = KeyType::NO_FUNCTION;
             configs[1].trigThreshMap[r][c] = 37;
             configs[1].pitchMap[r][c] = r * 16 + c;
             configs[1].channelMap[r][c] = 1;
         }
+        configs[1].channelPC[r]=40;
     }
+    configs[1].keyTypeMap[0][0] = KeyType::SINGLE_POINT;//左上角特殊功能键
+
+
+
+
+
+
 
     // ========== 配置 2： ==========
     for (int r = 0; r < MATRIX_ROWS; r++) {
@@ -67,5 +76,35 @@ void initAllConfigs() {
             configs[2].pitchMap[r][c] = r + c+48;
             configs[2].channelMap[r][c] = 1;
         }
+    }
+
+
+    // ========== 配置 3： ==========
+    for (int r = 0; r < MATRIX_ROWS; r++) {
+        for (int c = 0; c < MATRIX_COLS; c++) {
+            configs[3].keyTypeMap[r][c] = KeyType::NO_FUNCTION;
+            configs[3].trigThreshMap[r][c] = 40;
+            configs[3].channelMap[r][c] = 1;
+        }
+        configs[3].channelPC[r]=40;
+    }
+    configs[3].keyTypeMap[15][0] = KeyType::VIOLIN;
+    configs[3].keyTypeMap[15][4] = KeyType::VIOLIN;
+    configs[3].keyTypeMap[15][8] = KeyType::VIOLIN;
+    configs[3].keyTypeMap[15][12] = KeyType::VIOLIN;
+    configs[3].pitchMap[15][0] = 55+3;
+    configs[3].pitchMap[15][4] = 62+3;
+    configs[3].pitchMap[15][8] = 69+3;
+    configs[3].pitchMap[15][12] = 76+3;
+
+
+    // ========== 配置 4： ==========
+    for (int r = 0; r < MATRIX_ROWS; r++) {
+        for (int c = 0; c < MATRIX_COLS; c++) {
+            configs[4].keyTypeMap[r][c] = KeyType::DRUM;
+            configs[4].trigThreshMap[r][c] = 40;
+            configs[4].channelMap[r][c] = 1;
+        }
+        configs[4].channelPC[r]=38;
     }
 }

@@ -30,7 +30,10 @@ void PressToMIDI::keyAllocator (){
             _basicMPE(row,col,_usingConfig.channelMap[row][col]);break;
           case KeyType::SINGLE_POINT :
           _singlePoint(row,col,_usingConfig.channelMap[row][col]);break;
-          
+          case KeyType::VIOLIN :
+          _violin(row,col,_usingConfig.channelMap[row][col]);break;
+          case KeyType::DRUM :
+          _drum(row,col,_usingConfig.channelMap[row][col]);break;
         }
     }
   }
@@ -43,6 +46,7 @@ void PressToMIDI::keyAllocator (){
 
 //==============================按键配置结构体和PressToMIDI类的初始化===============
 KeyConfig::KeyConfig(){
+
   for (int i = 0; i < MATRIX_ROWS; i++) {
     for (int j = 0; j < MATRIX_COLS; j++) {
         keyTypeMap[i][j] = KeyType::BASIC_INSTRUMENT;
@@ -51,6 +55,7 @@ KeyConfig::KeyConfig(){
         channelMap[i][j]=1;
 
     }
+    channelPC[i]=0;
   }
 }
 
@@ -115,7 +120,7 @@ bool PressToMIDI::_weightBias(float& x, float& y, int row, int col,float& meanF,
   y = 2 * (raw_y + u) / (u + d) - 1.0;   // 垂直：上→下 映射 0→1
   
   meanF=denom;//((u+d+1.0)*(r+l+1.0));
-  Serial.println(meanF);
+  //Serial.println(meanF);
   return true;
 }
 
@@ -124,16 +129,13 @@ bool PressToMIDI::_weightBias(float& x, float& y, int row, int col,float& meanF,
 
 void PressToMIDI::setConfig(const KeyConfig& cfg) {
     _usingConfig = cfg;
-    MIDIEvent noteOff;
-    noteOff.type = MIDIEventType::NoteOff;
-    // 重置所有按键状态
-    for (int r = 0; r < MATRIX_ROWS; r++) {
-      noteOff.channel=r;
-      xQueueSendToBack(_midiQueue, &noteOff, 0);
-        for (int c = 0; c < MATRIX_COLS; c++) {
-            _KeyStateMap[r][c] = KeyState::FREE;
-        }
-
+    for(int i=0;i<16;i++){
+      MIDIEvent evt;  // 假设结构体名为 MidiEvent
+      evt.type = MIDIEventType::ProgramChange;  // 或你代码中定义的类型常量，比如 0xC0
+      evt.channel = i;           // 0–15
+      evt.data1 = _usingConfig.channelPC[i];
+      evt.data2 = evt.data1;                   // 忽略
+      xQueueSend(_midiQueue, &evt, portMAX_DELAY);
     }
 }
 

@@ -23,13 +23,15 @@ enum class KeyType{
   GUTAR,
   VIOLIN,
   BASIC_MPE,
-  SINGLE_POINT
+  SINGLE_POINT,
+  DRUM
 };
 struct KeyConfig{//按键配置，每项都是16*16矩阵，储存每个键的配置
   eskinMatrix trigThreshMap;//触发阈值
   KeyType keyTypeMap[MATRIX_ROWS][MATRIX_COLS];//调用触发逻辑的种类标记
   eskinMatrix pitchMap;//每个键的音高
   eskinMatrix channelMap;
+  int channelPC[16]; // 每个通道的程序变化
   KeyConfig();//构造函数
 };
 extern KeyConfig defaultCfg;//默认配置
@@ -78,6 +80,8 @@ class PressToMIDI{//将压力信号魔法般地变成midi信号
   void _piano(int row,int col,int channel);//钢琴，基本上就是基础款，但是按下时候会等到压力由大变小的时候再发声
   void _basicMPE(int row,int col,int channel);//MPE测试
   void _singlePoint(int row,int col,int channel);//单点触控全局弯音
+  void _violin(int row,int col,int channel);//单点触控全局弯音
+  void _drum(int row,int col,int channel);//鼓: max决定响度，xbias/ybias决定亮度  
 
 
 

@@ -135,7 +135,7 @@ void taskProcessMatrix(void *pvParameters) {
       pressToMIDI.process(matrixBuf);
       int end=micros();//调试计时
       //===========调试实现============/
-                //Serial.print("latency : ");   //
+                /*Serial.print("latency : ");   //
                 int delay=end-start;          //
                 //Serial.println(delay);        //
                 if(delay>maxDelay){           //
@@ -143,7 +143,7 @@ void taskProcessMatrix(void *pvParameters) {
                     Serial.print(", max latency:");//
                     Serial.println(maxDelay);           //
                 }                             //
-                     //
+                     */
             //================================//
     }
   }
