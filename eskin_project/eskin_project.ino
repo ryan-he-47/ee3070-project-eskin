@@ -8,7 +8,7 @@
 #include "src/midi_tool.h"
 #include "src/MPE_manager.h"
 #include <src/Keyboard.h>
-
+#include <src/USBMIDI1.h>
 #include <src/config.h>
 
 #define MATRIX_ROWS 16  // 矩阵行数
@@ -32,8 +32,9 @@ void taskCheckKeyboard(void *pvParameters);
 
 void setup() {
   Serial.begin(460800);
-  Serial2.begin(115200,SERIAL_8N1,41,42);
+  //Serial2.begin(115200,SERIAL_8N1,41,42);
   bleMidiBegin("ESP32-MIDI");
+  usbMidiBegin();
   delay(1000);  //等待串口稳定
   Serial.println("===程序启动===");
   Serial.printf("Free heap:%d\n", ESP.getFreeHeap());
@@ -156,8 +157,11 @@ void taskSendMIDI(void *pvParameters) {
       uint8_t rawMIDI[3];
       
       if(mpeManager.assignChannel(&eventBuf)){
-        midiEventEncoder(eventBuf, rawMIDI);
-        Serial2.write(rawMIDI,3);
+        if(eventBuf.type==MIDIEventType::ChannelAT){Serial.println(midiEventToString(eventBuf));}
+        
+        //midiEventEncoder(eventBuf, rawMIDI);
+        usbMidiSendEvent(eventBuf);
+        //Serial2.write(rawMIDI,3);
         bleMidiSendEvent(eventBuf);
       }
       

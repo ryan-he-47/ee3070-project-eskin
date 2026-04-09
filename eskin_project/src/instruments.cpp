@@ -180,7 +180,7 @@ void PressToMIDI::_singlePoint(int row,int col,int channel){
     }else if(_KeyStateMap[row][col]==KeyState::PRESSING){
     
     event.type=MIDIEventType::ChannelAT;
-    event.data1=max;
+    event.data1=max/2;
     event.data2=event.data1;
     xQueueSendToBack(output, &event, 0);
     
