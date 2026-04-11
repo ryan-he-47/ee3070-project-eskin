@@ -1,7 +1,7 @@
 #include "config.h"
 
 // 定义配置数量
-const int NUM_CONFIGS = 5;
+const int NUM_CONFIGS = 6;
 
 // 定义配置数组（注意：这里只是声明空间，实际内容在 initAllConfigs 中填充）
 KeyConfig configs[NUM_CONFIGS];
@@ -107,4 +107,17 @@ void initAllConfigs() {
         }
         configs[4].channelPC[r]=38;
     }
+
+    
+    for (int r = 0; r < MATRIX_ROWS; r++) {
+        for (int c = 0; c < MATRIX_COLS; c++) {
+            configs[4].keyTypeMap[r][c] = KeyType::DRUM;
+            configs[4].trigThreshMap[r][c] = 40;
+            configs[4].channelMap[r][c] = 1;
+        }
+        configs[4].channelPC[r]=38;
+    }
+
+
+
 }

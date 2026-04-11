@@ -157,8 +157,8 @@ void taskSendMIDI(void *pvParameters) {
       uint8_t rawMIDI[3];
       
       if(mpeManager.assignChannel(&eventBuf)){
-        if(eventBuf.type==MIDIEventType::ChannelAT){Serial.println(midiEventToString(eventBuf));}
-        
+        if(eventBuf.type==MIDIEventType::ChannelAT){}
+        Serial.println(midiEventToString(eventBuf));
         //midiEventEncoder(eventBuf, rawMIDI);
         usbMidiSendEvent(eventBuf);
         //Serial2.write(rawMIDI,3);

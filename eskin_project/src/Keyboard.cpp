@@ -50,7 +50,7 @@ void Keyboard::processKeys() const {
     }else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKey6)) {
         newConfig = 4;
     }else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKeyA)) {
-        //newConfig = ;
+        newConfig = 5;
     }else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKeyB)) {
         //newConfig = ;
     }else if (_keyboard.Pressed(emakefun::MatrixKeyboard::kKeyC)) {

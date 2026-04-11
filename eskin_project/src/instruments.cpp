@@ -46,6 +46,7 @@ void PressToMIDI::_piano(int row,int col,int channel){//钢琴
 
   if( (currentPressure>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){
     _KeyStateMap[row][col]=KeyState::PRESSING;
+    
   }
   
   
@@ -86,19 +87,24 @@ void mapFloatToPitchBend(float offset, uint8_t& data1, uint8_t& data2) {
 }
 
 void PressToMIDI::_basicMPE(int row,int col,int channel){//MPE
+  
   if((row<=0)||(row>=15)||(col<=0)||(col>=15)){return;}
   eskinMatrix* lastFrame=getCachePressPtr(1);
   QueueHandle_t output=_midiQueue;
   MIDIEvent event;
   if(lastFrame==nullptr){return;}
   const int deadzone=2;
+
+  float init_ybias[16][16] = {0};
+  float init_xibas[16][16] = {0};
   event.channel=channel;
   event.data1=_usingConfig.pitchMap[row][col];
   event.MPEnote=_usingConfig.pitchMap[row][col];
   int currentPressure=_pressNow[row][col];
-  event.data2=currentPressure-_usingConfig.trigThreshMap[row][col]+5;
+  event.data2 = constrain(currentPressure-_usingConfig.trigThreshMap[row][col]+5, 0, 127);
   if( (currentPressure>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){
     event.type=MIDIEventType::NoteOn;
+    
     xQueueSendToBack(output, &event, 0);
     _banKeys(true,row,col);
     _KeyStateMap[row][col]=KeyState::PRESSING;
@@ -115,17 +121,19 @@ void PressToMIDI::_basicMPE(int row,int col,int channel){//MPE
     float xbias;
     float ybias;
     float meanF;
+
     if (!_weightBias(xbias,ybias,row,col,meanF)) {
       ybias = 0.0f;
       meanF = 0.0f;
     }
+
     event.type=MIDIEventType::ChannelAT;
-    event.data1=meanF*9;
+    event.data1=constrain(meanF*127/20, 0, 127);//简单映射，实际应该是30-256的压力映射到0-127
     event.data2=event.data1;
     xQueueSendToBack(output, &event, 0);
     
     uint8_t pb1, pb2;
-    mapFloatToPitchBend(ybias, pb1, pb2);
+    mapFloatToPitchBend((ybias-init_ybias[row][col])*0.2, pb1, pb2);
     event.type = MIDIEventType::PitchBend;
     event.data1 = pb1;
     event.data2 = pb2;
@@ -198,7 +206,7 @@ void PressToMIDI::_singlePoint(int row,int col,int channel){
 
 
 void PressToMIDI::_violin(int row,int col,int channel){
-  if(row==15 && (col==0||col==4||col==8||col==12)){
+  if(row==15 && (col!=14) && (col!=15)){
     QueueHandle_t output=_midiQueue;
     MIDIEvent event;
     
@@ -222,7 +230,7 @@ void PressToMIDI::_violin(int row,int col,int channel){
       }
     }
 
-     event.data2=max/2;
+     event.data2=max/2;//简单映射，实际应该是30-256的压力映射到0-127
 
 
     if( (max>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){

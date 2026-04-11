@@ -102,7 +102,7 @@ void PressToMIDI::_banKeys(bool ban, int row, int col,int u, int d, int l, int r
 
 bool PressToMIDI::_weightBias(float& x, float& y, int row, int col,float& meanF,int u, int d, int l, int r){
   float xnume=0.0; 
-  float denom=0.001;
+  float denom=0.00001;
   float ynume=0.0; 
   if(row-u<0||row+d>15||col-l<0||col+r>15){return false;}
   for(int i = -u; i <= d; i++){
@@ -119,7 +119,7 @@ bool PressToMIDI::_weightBias(float& x, float& y, int row, int col,float& meanF,
   x = 2 * (raw_x + l) / (l + r) - 1.0;
   y = 2 * (raw_y + u) / (u + d) - 1.0;   // 垂直：上→下 映射 0→1
   
-  meanF=denom;//((u+d+1.0)*(r+l+1.0));
+  meanF=denom/((u+d+1.0)*(r+l+1.0));
   //Serial.println(meanF);
   return true;
 }
