@@ -61,7 +61,8 @@ void Keyboard::processKeys() const {
     if (newConfig != -1 && newConfig != currentConfig) {
         currentConfig = newConfig;
         pressToMIDI.setConfig(configs[currentConfig]);
-        Serial.printf("Switched to config %d\n", currentConfig);
+
+        //Serial.printf("Switched to config %d\n", currentConfig);
     }
 }
 

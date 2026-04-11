@@ -31,14 +31,14 @@ void taskSendMIDI(void *pvParameters);
 void taskCheckKeyboard(void *pvParameters);
 
 void setup() {
-  Serial.begin(460800);
+  Serial.begin(115200);
   //Serial2.begin(115200,SERIAL_8N1,41,42);
   bleMidiBegin("ESP32-MIDI");
   usbMidiBegin();
   delay(1000);  //等待串口稳定
   Serial.println("===程序启动===");
   Serial.printf("Free heap:%d\n", ESP.getFreeHeap());
-  mpeManager.setAvaliableChannel(2,14);
+  mpeManager.setAvaliableChannel(4,14);
   receiver.begin(460800, 47, 21);  // RX=47, TX=21
   
   initAllConfigs();
@@ -158,10 +158,10 @@ void taskSendMIDI(void *pvParameters) {
       
       if(mpeManager.assignChannel(&eventBuf)){
         if(eventBuf.type==MIDIEventType::ChannelAT){}
-        Serial.println(midiEventToString(eventBuf));
-        //midiEventEncoder(eventBuf, rawMIDI);
+        //Serial.println(midiEventToString(eventBuf));
+        midiEventEncoder(eventBuf, rawMIDI);
         usbMidiSendEvent(eventBuf);
-        //Serial2.write(rawMIDI,3);
+        Serial.write(rawMIDI,3);
         bleMidiSendEvent(eventBuf);
       }
       

@@ -39,7 +39,7 @@ void PressToMIDI::_piano(int row,int col,int channel){//钢琴
   const int deadzone=2;
   event.channel=channel;
   event.data1=_usingConfig.pitchMap[row][col];
-  event.MPEnote=_usingConfig.pitchMap[row][col];
+  //event.MPEnote=_usingConfig.pitchMap[row][col];
   int currentPressure=_pressNow[row][col]+_pressNow[row][col+1]+_pressNow[row+1][col]+_pressNow[row+1][col+1]-35*3;//4键平均压力
   int lastPressure=(*lastFrame)[row][col]+(*lastFrame)[row][col+1]+(*lastFrame)[row+1][col]+(*lastFrame)[row+1][col+1]-35*3;
   event.data2=currentPressure;
@@ -95,16 +95,27 @@ void PressToMIDI::_basicMPE(int row,int col,int channel){//MPE
   if(lastFrame==nullptr){return;}
   const int deadzone=2;
 
-  float init_ybias[16][16] = {0};
-  float init_xibas[16][16] = {0};
+  static float init_ybias[16][16] = {0};
+  static float init_xbias[16][16] = {0};
+  static float init_meanF[16][16] = {0};
+  float init_ybias_value = 0.0f;
+  float init_xbias_value = 0.0f;
+  float init_meanF_value = 0.0f;
+
+
   event.channel=channel;
   event.data1=_usingConfig.pitchMap[row][col];
   event.MPEnote=_usingConfig.pitchMap[row][col];
   int currentPressure=_pressNow[row][col];
   event.data2 = constrain(currentPressure-_usingConfig.trigThreshMap[row][col]+5, 0, 127);
   if( (currentPressure>=(_usingConfig.trigThreshMap[row][col]+deadzone)) && (_KeyStateMap[row][col]==KeyState::FREE) ){
+
+    _weightBias(init_xbias_value,init_ybias_value,row,col,init_meanF_value);
+    init_ybias[row][col]=init_ybias_value;
+    init_xbias[row][col]=init_xbias_value;
+    init_meanF[row][col]=init_meanF_value;
+
     event.type=MIDIEventType::NoteOn;
-    
     xQueueSendToBack(output, &event, 0);
     _banKeys(true,row,col);
     _KeyStateMap[row][col]=KeyState::PRESSING;

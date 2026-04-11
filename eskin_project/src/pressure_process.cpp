@@ -130,7 +130,7 @@ bool PressToMIDI::_weightBias(float& x, float& y, int row, int col,float& meanF,
 void PressToMIDI::setConfig(const KeyConfig& cfg) {
     _usingConfig = cfg;
     for(int i=0;i<16;i++){
-      MIDIEvent evt;  // 假设结构体名为 MidiEvent
+      MIDIEvent evt;  // 结构体名为evt
       evt.type = MIDIEventType::ProgramChange;  // 或你代码中定义的类型常量，比如 0xC0
       evt.channel = i;           // 0–15
       evt.data1 = _usingConfig.channelPC[i];

@@ -79,7 +79,7 @@ void initAllConfigs() {
     }
 
 
-    // ========== 配置 3： ==========
+    // ========== 配置 3：violin ==========
     for (int r = 0; r < MATRIX_ROWS; r++) {
         for (int c = 0; c < MATRIX_COLS; c++) {
             configs[3].keyTypeMap[r][c] = KeyType::NO_FUNCTION;
@@ -108,16 +108,52 @@ void initAllConfigs() {
         configs[4].channelPC[r]=38;
     }
 
-    
+    // ========== 配置 5： ==========
+    KeyType whiteKeyType2[16]={KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::NO_FUNCTION,KeyType::NO_FUNCTION,KeyType::NO_FUNCTION,KeyType::NO_FUNCTION};
+    KeyType blackKeyType2[16]={KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::PIANO,KeyType::NO_FUNCTION,KeyType::NO_FUNCTION,KeyType::NO_FUNCTION,KeyType::NO_FUNCTION};
     for (int r = 0; r < MATRIX_ROWS; r++) {
         for (int c = 0; c < MATRIX_COLS; c++) {
-            configs[4].keyTypeMap[r][c] = KeyType::DRUM;
-            configs[4].trigThreshMap[r][c] = 40;
-            configs[4].channelMap[r][c] = 1;
+            configs[5].keyTypeMap[r][c] = KeyType::NO_FUNCTION;
+            configs[5].trigThreshMap[r][c] = 40;
+            if(c>=12){
+                configs[5].channelMap[r][c] = 2;
+            }else if(c<12){
+            configs[5].channelMap[r][c] = 3;
+            }
         }
-        configs[4].channelPC[r]=38;
+        configs[5].channelPC[r]=73;
     }
 
+    configs[5].channelPC[2]=40;//violin
+    configs[5].channelPC[3]=0;//piano
+
+
+
+    for (int c = 0; c < MATRIX_COLS; c++) {
+
+
+        configs[5].pitchMap[6][c] = whiteKeys[c]+72;
+        configs[5].pitchMap[4][c] = blackKeys[c]+72;
+        configs[5].pitchMap[2][c] = whiteKeys[c]+84;
+        configs[5].pitchMap[0][c] = blackKeys[c]+84;
+
+
+        configs[5].keyTypeMap[6][c] = whiteKeyType2[c];
+        configs[5].keyTypeMap[4][c] = blackKeyType2[c];
+        configs[5].keyTypeMap[2][c] = whiteKeyType2[c];
+        configs[5].keyTypeMap[0][c] = blackKeyType2[c];
+    
+    }
+
+    configs[5].keyTypeMap[15][12] = KeyType::VIOLIN;
+    configs[5].pitchMap[15][12] = 62+3;
+    
+    for (int r = 8; r < MATRIX_ROWS; r++) {
+        for (int c = 0; c < 12; c++) {
+            configs[5].keyTypeMap[r][c] = KeyType::BASIC_MPE;
+            configs[5].pitchMap[r][c] = r + c + 48;
+        }
+    }
 
 
 }
