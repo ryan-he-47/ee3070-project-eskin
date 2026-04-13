@@ -28,14 +28,14 @@ void initAllConfigs() {
             configs[0].channelPC[r]=0;
         }
     for (int c = 0; c < MATRIX_COLS; c++) {
-        configs[0].pitchMap[14][c] = whiteKeys[c]+48;
-        configs[0].pitchMap[12][c] = blackKeys[c]+48;
-        configs[0].pitchMap[10][c] = whiteKeys[c]+60;
-        configs[0].pitchMap[8][c] = blackKeys[c]+60;
-        configs[0].pitchMap[6][c] = whiteKeys[c]+72;
-        configs[0].pitchMap[4][c] = blackKeys[c]+72;
-        configs[0].pitchMap[2][c] = whiteKeys[c]+84;
-        configs[0].pitchMap[0][c] = blackKeys[c]+84;
+        configs[0].pitchMap[14][c] = whiteKeys[c]+60;
+        configs[0].pitchMap[12][c] = blackKeys[c]+60;
+        configs[0].pitchMap[10][c] = whiteKeys[c]+72;
+        configs[0].pitchMap[8][c] = blackKeys[c]+72;
+        configs[0].pitchMap[6][c] = whiteKeys[c]+84;
+        configs[0].pitchMap[4][c] = blackKeys[c]+84;
+        configs[0].pitchMap[2][c] = whiteKeys[c]+96;
+        configs[0].pitchMap[0][c] = blackKeys[c]+96;
         configs[0].keyTypeMap[14][c] = whiteKeyType[c];
         configs[0].keyTypeMap[12][c] = blackKeyType[c];
         configs[0].keyTypeMap[10][c] = whiteKeyType[c];
@@ -76,6 +76,7 @@ void initAllConfigs() {
             configs[2].pitchMap[r][c] = r + c+48;
             configs[2].channelMap[r][c] = 1;
         }
+        configs[2].channelPC[r]=68;
     }
 
 
@@ -121,7 +122,7 @@ void initAllConfigs() {
             configs[5].channelMap[r][c] = 3;
             }
         }
-        configs[5].channelPC[r]=73;
+        configs[5].channelPC[r]=68;
     }
 
     configs[5].channelPC[2]=40;//violin

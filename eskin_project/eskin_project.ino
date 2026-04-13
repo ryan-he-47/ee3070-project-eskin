@@ -10,6 +10,8 @@
 #include <src/Keyboard.h>
 #include <src/USBMIDI1.h>
 #include <src/config.h>
+#include <src/wifi_tcp_client.h>
+
 
 #define MATRIX_ROWS 16  // 矩阵行数
 #define MATRIX_COLS 16  // 矩阵列数
@@ -29,6 +31,7 @@ void taskReceiveFPGA(void *pvParameters);
 void taskProcessMatrix(void *pvParameters);
 void taskSendMIDI(void *pvParameters);
 void taskCheckKeyboard(void *pvParameters);
+void taskMakeSureWIFIConnection(void *pvParameters);
 
 void setup() {
   Serial.begin(115200);
@@ -40,9 +43,9 @@ void setup() {
   Serial.printf("Free heap:%d\n", ESP.getFreeHeap());
   mpeManager.setAvaliableChannel(4,14);
   receiver.begin(460800, 47, 21);  // RX=47, TX=21
-  
   initAllConfigs();
-
+  connectWiFi();
+  connectToServer();
   if (!keyboard.begin()) {// 键盘初始化
       Serial.println(F("Keyboard init failed"));
       while (1);  
@@ -69,7 +72,7 @@ void setup() {
     "Process matrix, yield MIDIEvent",
     2048,
     NULL,
-    2,
+    3,
     NULL,
     1);
 
@@ -83,14 +86,24 @@ void setup() {
     0);
 
   xTaskCreatePinnedToCore(
-        taskCheckKeyboard,
-        "Continuously check keyboard",
-        1024*8,
-        NULL,
-        1,
-        NULL,
-        1
-    );
+    taskCheckKeyboard,
+    "Continuously check keyboard",
+    1024*8,
+    NULL,
+    2,
+    NULL,
+    1
+  );
+
+  xTaskCreatePinnedToCore(
+    taskMakeSureWIFIConnection,       // 任务函数
+    "MakeSureWIFIConnection",         // 任务名
+    1024*8,                             // 堆栈大小
+    NULL,                             // 参数
+    1,                                // 优先级
+    NULL,                             // 任务句柄
+    1                                 // 核心1
+  );
 }
 
 
@@ -161,6 +174,7 @@ void taskSendMIDI(void *pvParameters) {
         //Serial.println(midiEventToString(eventBuf));
         midiEventEncoder(eventBuf, rawMIDI);
         usbMidiSendEvent(eventBuf);
+        sendMessage(midiEventToString(eventBuf));
         Serial.write(rawMIDI,3);
         bleMidiSendEvent(eventBuf);
       }
@@ -171,8 +185,33 @@ void taskSendMIDI(void *pvParameters) {
 }
 
 void taskCheckKeyboard(void *pvParameters){
-    while(1){
-        keyboard.tickAndProcess();
-        vTaskDelay(125);
+  while(1){
+      keyboard.tickAndProcess();
+      vTaskDelay(125);
+  }
+}
+
+
+void taskMakeSureWIFIConnection(void *pvParameters){
+  while(1){
+
+    // 1. 确保 WiFi 连接
+    if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("[WiFi] 连接断开，尝试重连...");
+    connectWiFi();
+    return;
+    }
+    
+    // 2. 确保 TCP 连接
+    if (!client.connected()) {
+      unsigned long now = millis();
+      if (now - lastReconnectAttempt >= RECONNECT_INTERVAL) {
+          lastReconnectAttempt = now;
+          connectToServer();
+      }
+      return;
+    }
+
+    vTaskDelay(125);
     }
 }
