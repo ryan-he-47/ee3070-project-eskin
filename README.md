@@ -10,6 +10,9 @@ The instrument reads a 16x16 pressure matrix and converts it into MIDI events.
 Supported outputs:
 
 - USB MIDI
+- UART serial
+- BLE
+- wifi
 ## AI continuation flow
 
 The realtime continuation path is based on event tokens rather than frame-level piano roll data.
@@ -63,57 +66,25 @@ functions: read a 16\*16 pressure data from uart serial port with data format "p
 
 features: 
 
-support multiple output types, uart, BLE and usb(to be implemented).
+support multiple output types, uart, BLE and usb.
 
 programmable key layout(will have several good plug-and-play predefined configs).
 
 easy to add more key trigger logics by inheritance of pressToMIDI class and override process() function.
 
-
-
-requirements:
-
-this project is write in Arduino ide, the default "libraries/" folder of our Arduino ide has been uploaded, u can merge it with your libraries folder or search for the libraries from Arduino library manager according to the library name.
-
-
-
-p.s. early version, update function of class pressToMIDI() haven't been implemented, and cache function is ai written and haven't been tested, we are working on this. other functions in the main file and pressure\_process function block are hand written with comments.
+lstm model continuation.
 
 
 
 
 
-file structure:
 
 
 
 
 
-eskin\_project:.
 
-│  config.ino 	//user's key config file(to be implemented)
 
-│  eskin\_project.ino	//main .ino file (fully hand written, no ai)
-
-│
-
-└─src
-
-&nbsp;       BLEMidi.cpp	
-
-&nbsp;       BLEMidi.h		//Bluetooth LE function block header file
-
-&nbsp;       FPGA\_Reader.cpp
-
-&nbsp;       FPGA\_Reader.h		//UART serial port receive function block (name being "FPGA\_Reader" is because we use a fpga dev board to send uart)
-
-&nbsp;       keyboard.cpp
-
-&nbsp;       keyboard.h		//keyboard control function，uses 4*4 keyboard from emakefun (keyboard itself sometimes fail to work)
-
-&nbsp;       pressure\_process.cpp
-
-&nbsp;       pressure\_process.h		//core function block, generate midi event from raw pressure map (mostly hand written, some ai assist)
 
 
 
