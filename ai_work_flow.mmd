@@ -1,0 +1,49 @@
+flowchart LR
+  N10[/"surge xt合成器<br/><sub>合成声音</sub><br/><sub>IN: 虚拟midi端口</sub>"/]
+  N4{{"midi_in<br/><sub>接收midi控制器的输入，解析为钢琴卷轴数据帧，每帧包含127个钢琴琴键的压力值。<br/>目前只考虑处理note on/note off<br/><br/>控制功能：通过一个自定义cc消息的值来控制续写模式的开关和模型记忆清除</sub><br/><sub>IN: usb midi输入</sub><br/><sub>OUT: 续写控制信号, 转发原始midi消息, 钢琴卷轴数据帧向量</sub>"}}
+  N5[/"esp32-s3 midi控制器<br/><sub>全功能MPE控制器，通过USB-OTG功能输出usb midi信号</sub><br/><sub>OUT: usb</sub>"/]
+  N6{{"midi_out<br/><sub>创建一个虚拟midi端口，转发midi消息到surge xt合成器</sub><br/><sub>IN: 续写模式切换, 原始midi消息, 模型续写midi消息</sub><br/><sub>OUT: 虚拟midi端口</sub>"}}
+  N7[["自回归续写模型<br/><sub>接收输入张量，自回归续写下一个钢琴卷轴帧，接收到记忆清除指令时清除模型记忆，即对于lstm，重置隐状态，对于transformer，清空上下文嵌入向量</sub><br/><sub>IN: 记忆清除指令, 向量输入</sub><br/><sub>OUT: 预测钢琴卷轴帧向量</sub><br/><sub>MEM: 模型记忆</sub>"]]
+  N9["midi解码器<br/><sub>把帧向量解码为midi数据流</sub><br/><sub>IN: 帧向量</sub><br/><sub>OUT: 模型续写midi消息</sub>"]
+
+  %% I/O Connections
+  N5 --|"usb -> usb midi输入"|--> N4
+  N4 --|"钢琴卷轴数据帧向量 -> 向量输入"|--> N7
+  N7 --|"预测钢琴卷轴帧向量 -> 帧向量"|--> N9
+  N9 --|"模型续写midi消息 -> 模型续写midi消息"|--> N6
+  N4 --|"转发原始midi消息 -> 原始midi消息"|--> N6
+  N4 --|"续写控制信号 -> 记忆清除指令"|--> N7
+  N4 --|"续写控制信号 -> 续写模式切换"|--> N6
+  N6 --|"虚拟midi端口 -> 虚拟midi端口"|--> N10
+
+  %% Style classes
+  classDef cls_program fill:#1b9aaa22,stroke:#1b9aaa,stroke-width:2px;
+  classDef cls_module fill:#2f7d3222,stroke:#2f7d32,stroke-width:2px;
+  classDef cls_class fill:#3a6ea522,stroke:#3a6ea5,stroke-width:2px;
+  classDef cls_struct fill:#6c4ab622,stroke:#6c4ab6,stroke-width:2px;
+  classDef cls_function fill:#cf5c3622,stroke:#cf5c36,stroke-width:2px;
+  classDef cls_interface fill:#9a031e22,stroke:#9a031e,stroke-width:2px;
+  classDef cls_process fill:#7b6d2622,stroke:#7b6d26,stroke-width:2px;
+  class N10 cls_module;
+  class N4 cls_interface;
+  class N5 cls_module;
+  class N6 cls_interface;
+  class N7 cls_class;
+  class N9 cls_function;
+
+  %% VC_METADATA_BEGIN
+  %% VC_NODE {"id": "N10", "type": "module", "title": "surge xt\u5408\u6210\u5668", "description": "\u5408\u6210\u58f0\u97f3", "inputs": ["\u865a\u62dfmidi\u7aef\u53e3"], "outputs": [], "members": [], "x": 751.0, "y": -155.0, "w": 210.0, "h": 120.0, "parent": null}
+  %% VC_NODE {"id": "N4", "type": "interface", "title": "midi_in", "description": "\u63a5\u6536midi\u63a7\u5236\u5668\u7684\u8f93\u5165\uff0c\u89e3\u6790\u4e3a\u94a2\u7434\u5377\u8f74\u6570\u636e\u5e27\uff0c\u6bcf\u5e27\u5305\u542b127\u4e2a\u94a2\u7434\u7434\u952e\u7684\u538b\u529b\u503c\u3002\n\u76ee\u524d\u53ea\u8003\u8651\u5904\u7406note on/note off\n\n\u63a7\u5236\u529f\u80fd\uff1a\u901a\u8fc7\u4e00\u4e2a\u81ea\u5b9a\u4e49cc\u6d88\u606f\u7684\u503c\u6765\u63a7\u5236\u7eed\u5199\u6a21\u5f0f\u7684\u5f00\u5173\u548c\u6a21\u578b\u8bb0\u5fc6\u6e05\u9664", "inputs": ["usb midi\u8f93\u5165"], "outputs": ["\u7eed\u5199\u63a7\u5236\u4fe1\u53f7", "\u8f6c\u53d1\u539f\u59cbmidi\u6d88\u606f", "\u94a2\u7434\u5377\u8f74\u6570\u636e\u5e27\u5411\u91cf"], "members": [], "x": -487.0, "y": -302.0, "w": 396.0, "h": 391.0, "parent": null}
+  %% VC_NODE {"id": "N5", "type": "module", "title": "esp32-s3 midi\u63a7\u5236\u5668", "description": "\u5168\u529f\u80fdMPE\u63a7\u5236\u5668\uff0c\u901a\u8fc7USB-OTG\u529f\u80fd\u8f93\u51fausb midi\u4fe1\u53f7", "inputs": [], "outputs": ["usb"], "members": [], "x": -828.0, "y": -160.0, "w": 246.0, "h": 249.0, "parent": null}
+  %% VC_NODE {"id": "N6", "type": "interface", "title": "midi_out", "description": "\u521b\u5efa\u4e00\u4e2a\u865a\u62dfmidi\u7aef\u53e3\uff0c\u8f6c\u53d1midi\u6d88\u606f\u5230surge xt\u5408\u6210\u5668", "inputs": ["\u7eed\u5199\u6a21\u5f0f\u5207\u6362", "\u539f\u59cbmidi\u6d88\u606f", "\u6a21\u578b\u7eed\u5199midi\u6d88\u606f"], "outputs": ["\u865a\u62dfmidi\u7aef\u53e3"], "members": [], "x": 354.0, "y": -278.0, "w": 200.0, "h": 338.0, "parent": null}
+  %% VC_NODE {"id": "N7", "type": "class", "title": "\u81ea\u56de\u5f52\u7eed\u5199\u6a21\u578b", "description": "\u63a5\u6536\u8f93\u5165\u5f20\u91cf\uff0c\u81ea\u56de\u5f52\u7eed\u5199\u4e0b\u4e00\u4e2a\u94a2\u7434\u5377\u8f74\u5e27\uff0c\u63a5\u6536\u5230\u8bb0\u5fc6\u6e05\u9664\u6307\u4ee4\u65f6\u6e05\u9664\u6a21\u578b\u8bb0\u5fc6\uff0c\u5373\u5bf9\u4e8elstm\uff0c\u91cd\u7f6e\u9690\u72b6\u6001\uff0c\u5bf9\u4e8etransformer\uff0c\u6e05\u7a7a\u4e0a\u4e0b\u6587\u5d4c\u5165\u5411\u91cf", "inputs": ["\u8bb0\u5fc6\u6e05\u9664\u6307\u4ee4", "\u5411\u91cf\u8f93\u5165"], "outputs": ["\u9884\u6d4b\u94a2\u7434\u5377\u8f74\u5e27\u5411\u91cf"], "members": ["\u6a21\u578b\u8bb0\u5fc6"], "x": -33.0, "y": 53.0, "w": 285.0, "h": 356.0, "parent": null}
+  %% VC_NODE {"id": "N9", "type": "function", "title": "midi\u89e3\u7801\u5668", "description": "\u628a\u5e27\u5411\u91cf\u89e3\u7801\u4e3amidi\u6570\u636e\u6d41", "inputs": ["\u5e27\u5411\u91cf"], "outputs": ["\u6a21\u578b\u7eed\u5199midi\u6d88\u606f"], "members": [], "x": 300.0, "y": 181.0, "w": 275.0, "h": 126.0, "parent": null}
+  %% VC_EDGE {"source": "N5", "target": "N4", "source_port": "usb", "target_port": "usb midi\u8f93\u5165", "label": "usb -> usb midi\u8f93\u5165"}
+  %% VC_EDGE {"source": "N4", "target": "N7", "source_port": "\u94a2\u7434\u5377\u8f74\u6570\u636e\u5e27\u5411\u91cf", "target_port": "\u5411\u91cf\u8f93\u5165", "label": "\u94a2\u7434\u5377\u8f74\u6570\u636e\u5e27\u5411\u91cf -> \u5411\u91cf\u8f93\u5165"}
+  %% VC_EDGE {"source": "N7", "target": "N9", "source_port": "\u9884\u6d4b\u94a2\u7434\u5377\u8f74\u5e27\u5411\u91cf", "target_port": "\u5e27\u5411\u91cf", "label": "\u9884\u6d4b\u94a2\u7434\u5377\u8f74\u5e27\u5411\u91cf -> \u5e27\u5411\u91cf"}
+  %% VC_EDGE {"source": "N9", "target": "N6", "source_port": "\u6a21\u578b\u7eed\u5199midi\u6d88\u606f", "target_port": "\u6a21\u578b\u7eed\u5199midi\u6d88\u606f", "label": "\u6a21\u578b\u7eed\u5199midi\u6d88\u606f -> \u6a21\u578b\u7eed\u5199midi\u6d88\u606f"}
+  %% VC_EDGE {"source": "N4", "target": "N6", "source_port": "\u8f6c\u53d1\u539f\u59cbmidi\u6d88\u606f", "target_port": "\u539f\u59cbmidi\u6d88\u606f", "label": "\u8f6c\u53d1\u539f\u59cbmidi\u6d88\u606f -> \u539f\u59cbmidi\u6d88\u606f"}
+  %% VC_EDGE {"source": "N4", "target": "N7", "source_port": "\u7eed\u5199\u63a7\u5236\u4fe1\u53f7", "target_port": "\u8bb0\u5fc6\u6e05\u9664\u6307\u4ee4", "label": "\u7eed\u5199\u63a7\u5236\u4fe1\u53f7 -> \u8bb0\u5fc6\u6e05\u9664\u6307\u4ee4"}
+  %% VC_EDGE {"source": "N4", "target": "N6", "source_port": "\u7eed\u5199\u63a7\u5236\u4fe1\u53f7", "target_port": "\u7eed\u5199\u6a21\u5f0f\u5207\u6362", "label": "\u7eed\u5199\u63a7\u5236\u4fe1\u53f7 -> \u7eed\u5199\u6a21\u5f0f\u5207\u6362"}
+  %% VC_EDGE {"source": "N6", "target": "N10", "source_port": "\u865a\u62dfmidi\u7aef\u53e3", "target_port": "\u865a\u62dfmidi\u7aef\u53e3", "label": "\u865a\u62dfmidi\u7aef\u53e3 -> \u865a\u62dfmidi\u7aef\u53e3"}
+  %% VC_METADATA_END

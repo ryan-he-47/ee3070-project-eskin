@@ -1,0 +1,292 @@
+{
+  "checkpoint": "runs\\lstm_longwin_24fps\\last.pth",
+  "epoch": 24,
+  "fps": 24,
+  "prompt_seconds": 10.0,
+  "continue_seconds": 30.0,
+  "threshold": 0.1,
+  "decode_mode": "hybrid",
+  "top_k": 4,
+  "min_active": 1,
+  "max_active": 0,
+  "temperature": 1.0,
+  "sustain": 0.0,
+  "binary_active": false,
+  "stuck_window": 24,
+  "stuck_jitter": 0.08,
+  "frame_hold": 1,
+  "voice_lead_weight": 0.0,
+  "voice_lead_sigma": 4.0,
+  "voice_lead_hold_bonus": 1.5,
+  "voice_lead_neighbor_bonus": 1.0,
+  "centroid_lock_weight": 0.0,
+  "centroid_lock_sigma": 9.0,
+  "sample_indices": [
+    0,
+    40,
+    80,
+    120,
+    160,
+    200
+  ],
+  "files": [
+    {
+      "sample_index": 0,
+      "wav": "runs\\lstm_longwin_24fps\\audition_history_recap_precise\\last\\sample_0_p240_c720_fps24.wav",
+      "prompt_frames": 240,
+      "continue_frames": 720,
+      "total_frames": 960
+    },
+    {
+      "sample_index": 40,
+      "wav": "runs\\lstm_longwin_24fps\\audition_history_recap_precise\\last\\sample_40_p240_c720_fps24.wav",
+      "prompt_frames": 240,
+      "continue_frames": 720,
+      "total_frames": 960
+    },
+    {
+      "sample_index": 80,
+      "wav": "runs\\lstm_longwin_24fps\\audition_history_recap_precise\\last\\sample_80_p240_c720_fps24.wav",
+      "prompt_frames": 240,
+      "continue_frames": 720,
+      "total_frames": 960
+    },
+    {
+      "sample_index": 120,
+      "wav": "runs\\lstm_longwin_24fps\\audition_history_recap_precise\\last\\sample_120_p240_c720_fps24.wav",
+      "prompt_frames": 240,
+      "continue_frames": 720,
+      "total_frames": 960
+    },
+    {
+      "sample_index": 160,
+      "wav": "runs\\lstm_longwin_24fps\\audition_history_recap_precise\\last\\sample_160_p240_c720_fps24.wav",
+      "prompt_frames": 240,
+      "continue_frames": 720,
+      "total_frames": 960
+    },
+    {
+      "sample_index": 200,
+      "wav": "runs\\lstm_longwin_24fps\\audition_history_recap_precise\\last\\sample_200_p240_c720_fps24.wav",
+      "prompt_frames": 240,
+      "continue_frames": 720,
+      "total_frames": 960
+    }
+  ],
+  "metrics": {
+    "samples": [
+      {
+        "sample_index": 0,
+        "prompt": {
+          "frames": 240,
+          "seconds": 10.0,
+          "mean_active": 4.0916666984558105,
+          "std_active": 2.6044700145721436,
+          "change_ratio": 0.3807531380753138,
+          "onsets_per_sec": 11.2,
+          "pitch_centroid_mean": 61.56950378417969,
+          "pitch_centroid_std": 23.313989639282227,
+          "centroid_step_mean": 5.068489074707031,
+          "centroid_step_std": 13.674657821655273,
+          "frame_overlap_mean": 0.7097981572151184,
+          "unique_frame_ratio": 0.3333333333333333
+        },
+        "continuation": {
+          "frames": 720,
+          "seconds": 30.0,
+          "mean_active": 4.330555438995361,
+          "std_active": 0.7882186770439148,
+          "change_ratio": 0.004172461752433936,
+          "onsets_per_sec": 0.2,
+          "pitch_centroid_mean": 71.0821762084961,
+          "pitch_centroid_std": 0.36040180921554565,
+          "centroid_step_mean": 0.026178309693932533,
+          "centroid_step_std": 0.11841557919979095,
+          "frame_overlap_mean": 0.9990264177322388,
+          "unique_frame_ratio": 0.005555555555555556
+        }
+      },
+      {
+        "sample_index": 40,
+        "prompt": {
+          "frames": 240,
+          "seconds": 10.0,
+          "mean_active": 7.579166889190674,
+          "std_active": 2.3721437454223633,
+          "change_ratio": 0.0794979079497908,
+          "onsets_per_sec": 2.5,
+          "pitch_centroid_mean": 62.21028518676758,
+          "pitch_centroid_std": 2.8027684688568115,
+          "centroid_step_mean": 0.1616763174533844,
+          "centroid_step_std": 0.7442411780357361,
+          "frame_overlap_mean": 0.9827668070793152,
+          "unique_frame_ratio": 0.08333333333333333
+        },
+        "continuation": {
+          "frames": 720,
+          "seconds": 30.0,
+          "mean_active": 7.441666603088379,
+          "std_active": 0.6907625198364258,
+          "change_ratio": 0.005563282336578581,
+          "onsets_per_sec": 0.36666666666666664,
+          "pitch_centroid_mean": 53.65823745727539,
+          "pitch_centroid_std": 0.9584842920303345,
+          "centroid_step_mean": 0.025900589302182198,
+          "centroid_step_std": 0.07934707403182983,
+          "frame_overlap_mean": 0.999406099319458,
+          "unique_frame_ratio": 0.006944444444444444
+        }
+      },
+      {
+        "sample_index": 80,
+        "prompt": {
+          "frames": 240,
+          "seconds": 10.0,
+          "mean_active": 4.666666507720947,
+          "std_active": 1.976247787475586,
+          "change_ratio": 0.1799163179916318,
+          "onsets_per_sec": 4.0,
+          "pitch_centroid_mean": 68.83411407470703,
+          "pitch_centroid_std": 1.7584218978881836,
+          "centroid_step_mean": 0.203233003616333,
+          "centroid_step_std": 0.5624781250953674,
+          "frame_overlap_mean": 0.9518545269966125,
+          "unique_frame_ratio": 0.18333333333333332
+        },
+        "continuation": {
+          "frames": 720,
+          "seconds": 30.0,
+          "mean_active": 4.0,
+          "std_active": 0.0,
+          "change_ratio": 0.0,
+          "onsets_per_sec": 0.13333333333333333,
+          "pitch_centroid_mean": 61.8478889465332,
+          "pitch_centroid_std": 0.1663723886013031,
+          "centroid_step_mean": 0.029890529811382294,
+          "centroid_step_std": 0.08468397706747055,
+          "frame_overlap_mean": 1.0,
+          "unique_frame_ratio": 0.001388888888888889
+        }
+      },
+      {
+        "sample_index": 120,
+        "prompt": {
+          "frames": 240,
+          "seconds": 10.0,
+          "mean_active": 15.958333015441895,
+          "std_active": 7.580562591552734,
+          "change_ratio": 0.16736401673640167,
+          "onsets_per_sec": 5.3,
+          "pitch_centroid_mean": 63.908260345458984,
+          "pitch_centroid_std": 3.8584234714508057,
+          "centroid_step_mean": 0.5426786541938782,
+          "centroid_step_std": 2.5576975345611572,
+          "frame_overlap_mean": 0.9713380336761475,
+          "unique_frame_ratio": 0.17083333333333334
+        },
+        "continuation": {
+          "frames": 720,
+          "seconds": 30.0,
+          "mean_active": 12.01805591583252,
+          "std_active": 0.13315236568450928,
+          "change_ratio": 0.006954102920723227,
+          "onsets_per_sec": 0.5,
+          "pitch_centroid_mean": 72.24324035644531,
+          "pitch_centroid_std": 0.3453567326068878,
+          "centroid_step_mean": 0.025128742679953575,
+          "centroid_step_std": 0.07488346099853516,
+          "frame_overlap_mean": 0.9994650483131409,
+          "unique_frame_ratio": 0.004166666666666667
+        }
+      },
+      {
+        "sample_index": 160,
+        "prompt": {
+          "frames": 240,
+          "seconds": 10.0,
+          "mean_active": 8.641666412353516,
+          "std_active": 4.481063365936279,
+          "change_ratio": 0.34309623430962344,
+          "onsets_per_sec": 8.9,
+          "pitch_centroid_mean": 59.994895935058594,
+          "pitch_centroid_std": 4.144215106964111,
+          "centroid_step_mean": 0.7278890609741211,
+          "centroid_step_std": 1.4209345579147339,
+          "frame_overlap_mean": 0.9105165600776672,
+          "unique_frame_ratio": 0.325
+        },
+        "continuation": {
+          "frames": 720,
+          "seconds": 30.0,
+          "mean_active": 3.0999999046325684,
+          "std_active": 0.36666667461395264,
+          "change_ratio": 0.004172461752433936,
+          "onsets_per_sec": 0.2,
+          "pitch_centroid_mean": 56.314517974853516,
+          "pitch_centroid_std": 0.7513864636421204,
+          "centroid_step_mean": 0.045625217258930206,
+          "centroid_step_std": 0.13880102336406708,
+          "frame_overlap_mean": 0.9991422891616821,
+          "unique_frame_ratio": 0.005555555555555556
+        }
+      },
+      {
+        "sample_index": 200,
+        "prompt": {
+          "frames": 240,
+          "seconds": 10.0,
+          "mean_active": 7.3416666984558105,
+          "std_active": 3.441162347793579,
+          "change_ratio": 0.10460251046025104,
+          "onsets_per_sec": 3.4,
+          "pitch_centroid_mean": 69.05146789550781,
+          "pitch_centroid_std": 1.5899488925933838,
+          "centroid_step_mean": 0.17281149327754974,
+          "centroid_step_std": 0.5880900025367737,
+          "frame_overlap_mean": 0.9733895659446716,
+          "unique_frame_ratio": 0.10833333333333334
+        },
+        "continuation": {
+          "frames": 720,
+          "seconds": 30.0,
+          "mean_active": 1.068055510520935,
+          "std_active": 0.4008069634437561,
+          "change_ratio": 0.005563282336578581,
+          "onsets_per_sec": 0.16666666666666666,
+          "pitch_centroid_mean": 73.80659484863281,
+          "pitch_centroid_std": 1.0872700214385986,
+          "centroid_step_mean": 0.014666210860013962,
+          "centroid_step_std": 0.14732012152671814,
+          "frame_overlap_mean": 0.9982151389122009,
+          "unique_frame_ratio": 0.006944444444444444
+        }
+      }
+    ],
+    "aggregate": {
+      "prompt": {
+        "mean_active": 8.04652770360311,
+        "std_active": 3.7426083087921143,
+        "change_ratio": 0.20920502092050208,
+        "onsets_per_sec": 5.883333333333333,
+        "pitch_centroid_mean": 64.26142120361328,
+        "pitch_centroid_std": 6.2446279128392534,
+        "centroid_step_mean": 1.1461296007037163,
+        "centroid_step_std": 3.2580165366331735,
+        "frame_overlap_mean": 0.9166106084982554,
+        "unique_frame_ratio": 0.20069444444444443
+      },
+      "continuation": {
+        "mean_active": 5.326388895511627,
+        "std_active": 0.39660120010375977,
+        "change_ratio": 0.00440426518312471,
+        "onsets_per_sec": 0.2611111111111111,
+        "pitch_centroid_mean": 64.82544263203938,
+        "pitch_centroid_std": 0.6115452845891317,
+        "centroid_step_mean": 0.027898266601065796,
+        "centroid_step_std": 0.10724187269806862,
+        "frame_overlap_mean": 0.9992091655731201,
+        "unique_frame_ratio": 0.005092592592592593
+      }
+    }
+  }
+}

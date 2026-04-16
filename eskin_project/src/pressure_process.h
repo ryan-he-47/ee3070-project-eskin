@@ -24,7 +24,9 @@ enum class KeyType{
   VIOLIN,
   BASIC_MPE,
   SINGLE_POINT,
-  DRUM
+  DRUM,
+  AI_CONTINUE_HOLD,
+  AI_CLEAR_MEMORY
 };
 struct KeyConfig{//按键配置，每项都是16*16矩阵，储存每个键的配置
   eskinMatrix trigThreshMap;//触发阈值
@@ -82,6 +84,10 @@ class PressToMIDI{//将压力信号魔法般地变成midi信号
   void _singlePoint(int row,int col,int channel);//单点触控全局弯音
   void _violin(int row,int col,int channel);//单点触控全局弯音
   void _drum(int row,int col,int channel);//鼓: max决定响度，xbias/ybias决定亮度  
+  void _aiContinueHold(int row,int col,int channel);//AI续写控制键：按下开始、抬起结束
+  void _aiClearMemory(int row,int col,int channel);//AI续写控制键：按下清空模型记忆
+
+  bool isAIContinuationActive() const { return _aiContinuationActive; }
 
 
 
@@ -111,6 +117,7 @@ class PressToMIDI{//将压力信号魔法般地变成midi信号
    // 私有辅助：计算缓存帧的索引（内部复用，也是缓存功能用的）
   int _getCacheIndex(int offset);
   void _updatePress(eskinMatrix& pressMat);
+  bool _aiContinuationActive = false;
 
 
   //====================================================================

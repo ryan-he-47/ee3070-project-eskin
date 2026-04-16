@@ -1,0 +1,13 @@
+{
+  "checkpoint": "midi_gen_ai\\runs\\lstm_longwin_24fps\\best.pth",
+  "hidden_size": 256,
+  "num_layers": 2,
+  "dropout": 0.1,
+  "fps": 24,
+  "prompt_midi": "midi_gen_ai_rewrite\\runs\\event_lm_v1\\audition_archive_20260410_1\\listen_prompt_10s.mid",
+  "prompt_frames_used": 192,
+  "generated_frames": 720,
+  "generated_seconds": 30.0,
+  "output_midi": "midi_gen_ai\\runs\\lstm_longwin_24fps\\audition_history_recap\\lstm_longwin24_best_recap.mid",
+  "output_wav": "midi_gen_ai\\runs\\lstm_longwin_24fps\\audition_history_recap\\lstm_longwin24_best_recap.wav"
+}

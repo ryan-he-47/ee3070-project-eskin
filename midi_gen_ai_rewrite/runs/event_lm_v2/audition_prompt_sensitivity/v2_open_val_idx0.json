@@ -1,0 +1,14 @@
+{
+  "checkpoint": "runs\\event_lm_v2\\best.pth",
+  "prompt_index": 0,
+  "prompt_length": 1024,
+  "prompt_seconds": 13.52,
+  "generated_length": 2224,
+  "min_new_tokens": 160,
+  "min_new_seconds": 10.0,
+  "temperature": 1.15,
+  "top_k": 12,
+  "top_p": 0.98,
+  "context_len": 512,
+  "output_midi": "runs\\event_lm_v2\\audition_prompt_sensitivity\\v2_open_val_idx0.mid"
+}

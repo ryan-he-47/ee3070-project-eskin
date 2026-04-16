@@ -35,6 +35,7 @@ extern String receiveBuffer;
 void connectWiFi();
 void connectToServer();
 void sendMessage(String msg);
+void sendMIDIFrame(const uint8_t frame[3]);
 void sendSensorData();
 void receiveData();
 void processCommand(String cmd);

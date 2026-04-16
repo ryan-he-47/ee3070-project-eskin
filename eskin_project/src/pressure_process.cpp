@@ -21,6 +21,10 @@ void PressToMIDI::keyAllocator (){
   for (int row = 0; row < MATRIX_ROWS; row++) {
     for (int col = 0; col < MATRIX_COLS; col++) {
         if(_sensorMap[row][col]!=0){continue;}
+        KeyType keyType = _usingConfig.keyTypeMap[row][col];
+        if (_aiContinuationActive && keyType != KeyType::AI_CONTINUE_HOLD && keyType != KeyType::AI_CLEAR_MEMORY) {
+          continue;
+        }
         switch (_usingConfig.keyTypeMap[row][col]){
           case KeyType::BASIC_INSTRUMENT :
             _basicInstrument(row,col,_usingConfig.channelMap[row][col]);break;
@@ -34,6 +38,12 @@ void PressToMIDI::keyAllocator (){
           _violin(row,col,_usingConfig.channelMap[row][col]);break;
           case KeyType::DRUM :
           _drum(row,col,_usingConfig.channelMap[row][col]);break;
+          case KeyType::AI_CONTINUE_HOLD :
+          _aiContinueHold(row,col,_usingConfig.channelMap[row][col]);break;
+          case KeyType::AI_CLEAR_MEMORY :
+          _aiClearMemory(row,col,_usingConfig.channelMap[row][col]);break;
+          default:
+          break;
         }
     }
   }

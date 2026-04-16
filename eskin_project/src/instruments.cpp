@@ -327,3 +327,59 @@ void PressToMIDI::_drum(int row,int col,int channel){
     }
   }
 }
+
+void PressToMIDI::_aiContinueHold(int row,int col,int channel) {
+  if (row >= 15 || col >= 15) { return; }
+  eskinMatrix* lastFrame = getCachePressPtr(1);
+  if (lastFrame == nullptr) { return; }
+  QueueHandle_t output = _midiQueue;
+  const int deadzone = 2;
+
+  int currentPressure = _pressNow[row][col] + _pressNow[row][col + 1] + _pressNow[row + 1][col] + _pressNow[row + 1][col + 1] - 35 * 3;
+  int lastPressure = (*lastFrame)[row][col] + (*lastFrame)[row][col + 1] + (*lastFrame)[row + 1][col] + (*lastFrame)[row + 1][col + 1] - 35 * 3;
+
+  MIDIEvent event;
+  event.type = MIDIEventType::ControlChange;
+  event.channel = channel;
+  event.data1 = 102;
+
+  if ((currentPressure >= (_usingConfig.trigThreshMap[row][col] + deadzone)) && (_KeyStateMap[row][col] == KeyState::FREE)) {
+    _KeyStateMap[row][col] = KeyState::PRESSING;
+  }
+
+  if ((currentPressure > lastPressure) && (_KeyStateMap[row][col] == KeyState::PRESSING) && !_aiContinuationActive) {
+    event.data2 = 127;  // start continuation
+    xQueueSendToBack(output, &event, 0);
+    _aiContinuationActive = true;
+    _KeyStateMap[row][col] = KeyState::LIFTING;
+  }
+
+  if ((currentPressure < (_usingConfig.trigThreshMap[row][col])) && (_KeyStateMap[row][col] == KeyState::LIFTING)) {
+    event.data2 = 0;  // stop continuation
+    xQueueSendToBack(output, &event, 0);
+    _aiContinuationActive = false;
+    _KeyStateMap[row][col] = KeyState::FREE;
+  }
+}
+
+void PressToMIDI::_aiClearMemory(int row,int col,int channel) {
+  if (row >= 15 || col >= 15) { return; }
+  QueueHandle_t output = _midiQueue;
+  const int deadzone = 2;
+  int currentPressure = _pressNow[row][col] + _pressNow[row][col + 1] + _pressNow[row + 1][col] + _pressNow[row + 1][col + 1] - 35 * 3;
+
+  MIDIEvent event;
+  event.type = MIDIEventType::ControlChange;
+  event.channel = channel;
+  event.data1 = 102;
+  event.data2 = 64;  // clear model memory
+
+  if ((currentPressure >= (_usingConfig.trigThreshMap[row][col] + deadzone)) && (_KeyStateMap[row][col] == KeyState::FREE)) {
+    xQueueSendToBack(output, &event, 0);
+    _KeyStateMap[row][col] = KeyState::PRESSING;
+  }
+
+  if ((currentPressure < (_usingConfig.trigThreshMap[row][col])) && (_KeyStateMap[row][col] == KeyState::PRESSING)) {
+    _KeyStateMap[row][col] = KeyState::FREE;
+  }
+}

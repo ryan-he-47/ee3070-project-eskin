@@ -1,0 +1,12 @@
+{
+  "checkpoint": "C:\\Users\\he\\Documents\\Arduino\\midi_gen_ai_rewrite\\runs\\event_lm_v2\\best.pth",
+  "onnx_path": "C:\\Users\\he\\Documents\\Arduino\\sample_project\\main\\models\\p4\\v2_best.onnx",
+  "espdl_path": "C:\\Users\\he\\Documents\\Arduino\\sample_project\\main\\models\\p4\\v2_best.espdl",
+  "vocab_size": 311,
+  "embed_dim": 192,
+  "hidden_dim": 384,
+  "num_layers": 2,
+  "dropout": 0.35,
+  "equivalent_unrolled_lstm": true,
+  "equivalent_random_weights": true
+}

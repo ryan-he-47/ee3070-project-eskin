@@ -61,7 +61,7 @@ void setup() {
     "Receive data stream from fpga",  // 任务名
     2048,                             // 堆栈大小
     NULL,                             // 参数
-    1,                                // 优先级
+    10,                                // 优先级
     NULL,                             // 任务句柄
     0                                 // 核心0
   );
@@ -72,7 +72,7 @@ void setup() {
     "Process matrix, yield MIDIEvent",
     2048,
     NULL,
-    3,
+    10,
     NULL,
     1);
 
@@ -174,8 +174,8 @@ void taskSendMIDI(void *pvParameters) {
         //Serial.println(midiEventToString(eventBuf));
         midiEventEncoder(eventBuf, rawMIDI);
         usbMidiSendEvent(eventBuf);
-        sendMessage(midiEventToString(eventBuf));
-        Serial.write(rawMIDI,3);
+        sendMIDIFrame(rawMIDI);
+        //Serial.write(rawMIDI,3);
         bleMidiSendEvent(eventBuf);
       }
       
@@ -199,7 +199,8 @@ void taskMakeSureWIFIConnection(void *pvParameters){
     if (WiFi.status() != WL_CONNECTED) {
     Serial.println("[WiFi] 连接断开，尝试重连...");
     connectWiFi();
-    return;
+    vTaskDelay(250);
+    continue;
     }
     
     // 2. 确保 TCP 连接
@@ -209,8 +210,11 @@ void taskMakeSureWIFIConnection(void *pvParameters){
           lastReconnectAttempt = now;
           connectToServer();
       }
-      return;
+      vTaskDelay(250);
+      continue;
     }
+
+    receiveData();
 
     vTaskDelay(125);
     }

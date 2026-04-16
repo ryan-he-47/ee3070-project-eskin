@@ -28,24 +28,30 @@ void initAllConfigs() {
             configs[0].channelPC[r]=0;
         }
     for (int c = 0; c < MATRIX_COLS; c++) {
-        configs[0].pitchMap[14][c] = whiteKeys[c]+60;
-        configs[0].pitchMap[12][c] = blackKeys[c]+60;
-        configs[0].pitchMap[10][c] = whiteKeys[c]+72;
-        configs[0].pitchMap[8][c] = blackKeys[c]+72;
-        configs[0].pitchMap[6][c] = whiteKeys[c]+84;
-        configs[0].pitchMap[4][c] = blackKeys[c]+84;
-        configs[0].pitchMap[2][c] = whiteKeys[c]+96;
-        configs[0].pitchMap[0][c] = blackKeys[c]+96;
+        configs[0].pitchMap[14][c] = whiteKeys[c]+60-12;
+        configs[0].pitchMap[12][c] = blackKeys[c]+60-12;
+        configs[0].pitchMap[10][c] = whiteKeys[c]+72-12;
+        configs[0].pitchMap[8][c] = blackKeys[c]+72-12;
+        configs[0].pitchMap[6][c] = whiteKeys[c]+84-12;
+        configs[0].pitchMap[4][c] = blackKeys[c]+84-12;
+        configs[0].pitchMap[2][c] = whiteKeys[c]+96-12;
+        configs[0].pitchMap[0][c] = blackKeys[c]+96-12;
         configs[0].keyTypeMap[14][c] = whiteKeyType[c];
         configs[0].keyTypeMap[12][c] = blackKeyType[c];
         configs[0].keyTypeMap[10][c] = whiteKeyType[c];
         configs[0].keyTypeMap[8][c] = blackKeyType[c];
         configs[0].keyTypeMap[6][c] = whiteKeyType[c];
         configs[0].keyTypeMap[4][c] = blackKeyType[c];
-        configs[0].keyTypeMap[2][c] = whiteKeyType[c];
-        configs[0].keyTypeMap[0][c] = blackKeyType[c];
+        configs[0].keyTypeMap[2][c] = KeyType::NO_FUNCTION;
+        configs[0].keyTypeMap[0][c] = KeyType::NO_FUNCTION;
     
     }
+
+    // 在钢琴布局中替换两个高音按键为AI续写控制键
+    // 0,12: 按住开始续写，松开结束续写（CC102 value=127/0）
+    // 0,14: 按下清空模型记忆（CC102 value=64）
+    configs[0].keyTypeMap[0][12] = KeyType::AI_CONTINUE_HOLD;
+    configs[0].keyTypeMap[0][14] = KeyType::AI_CLEAR_MEMORY;
     
     
     
