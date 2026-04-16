@@ -1,5 +1,55 @@
-# 忽略未使用的库文件夹
-not_use_libraries/
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
 
-# 忽略AI相关的本地测试文件夹
+# Arduino IDE default libraries folder (local machine state)
+libraries/
+
+# Python caches and environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Arduino / embedded build outputs
+**/build/
+**/.pio/
+**/.cache/
+*.hex
+*.elf
+*.bin
+*.map
+
+# Generated AI data and caches
+midi_gen_ai/dataset/
+midi_gen_ai_rewrite/dataset/
+**/.event_token_cache/
+**/*.mid
+**/*.midi
+**/*.wav
+**/*.npy
+**/*.npz
+
+# Runtime outputs and checkpoints that should stay local
+midi_gen_ai_rewrite/runs/**/logs/
+midi_gen_ai_rewrite/runs/**/audition_*/
+midi_gen_ai_rewrite/runs/**/generated.*
+
+# Showcase artifacts to keep in repo
+!midi_gen_ai_rewrite/runs/event_lm_v2/best.pth
+!midi_gen_ai_rewrite/runs/event_lm_v2/audition_prompt_sensitivity/
+!midi_gen_ai_rewrite/runs/event_lm_v2/audition_prompt_sensitivity/*.json
+!midi_gen_ai_rewrite/runs/event_lm_v2/audition_prompt_sensitivity/*.mid
+
+# Archived / unused local folders
+not_use_libraries/
 eskin_project_for_ai/
